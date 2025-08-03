@@ -1,0 +1,120 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% Supplementary %%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Requires: titlesec
+% Loads: chngcntr
+% Provides:
+%  - \supplementary
+
+%% The \supplementary command is meant to be used in a similar many to \appendix:
+%% It is a state change, indicating that everything below will be part of the supplementary.
+%% The idea is to compile the supplementary in the same document as the main
+%% text, but such that it can easily be separated (either with a PDF editor,
+%% or by separating actual printed pages).
+%% Compiling everything together ensures that references remain up to date
+%% and styling is consistent.
+%% For most forms of distribution (preprint, personal communication, etc.)
+%% having a single document is usually better.
+%% The one exception of course is submission to a journal, which usually
+%% require separate files for main and supplementary material.
+%% - For the initial submission (which is usually just a PDF), it is
+%%   easiest to split the resulting PDF post-hoc.
+%% - For final submission, you will need to remove the supplementary and edit
+%%   references by hand in the submitted source.
+
+%% In addition to creating a titlepage, the \supplementary macro
+%% applies a few style changes:
+%% - Change the running header to include "Supplementary Information"
+%% - Use a slightly more spacious line spacing
+%% - To accommodate the typically higher density of figures:
+%%   - Adjust \textfraction & co. to allow more figures per page.
+%%   - Change the default placement for figures and tables to [h]
+%% - Reset all counters and prefix them so that cross-references use `Supplementary Figure 1`, `Supplementary Table 1`, etc.
+%% - Center section titles so they stand out better.
+
+% Some elements based on the following:
+% - https://tex.stackexchange.com/a/169606
+% - https://tex.stackexchange.com/a/112194
+% - https://tex.stackexchange.com/q/554045
+% - https://tex.stackexchange.com/a/696663
+
+% Configure all the counters to reset for the supplementary
+% (The supplementary is formally a new part)
+% Without this, references to Eq (S1) may display correctly but link to Eq (1)
+% in the main text instead.
+\RequirePackage{chngcntr}
+\counterwithin*{equation}{part}
+\counterwithin*{figure}{part}
+\counterwithin*{table}{part}
+\counterwithin*{page}{part}
+
+%% Execute commands to typeset the Supplementary, as a separate document
+%% (with title) appended to the main one
+%% Similar to \appendix, this should be executed just before the first
+%% \section command of the supplementary.
+\NewDocumentCommand{\supplementary}{}{%
+  % NB: \cleardoublepage will ensure the supplementary starts on an odd page,
+  %     so that when printing it can easily be separated from the main text.
+  \cleardoublepage
+
+  %%% Update the layout %%%
+
+  % Give the supplementary a big more breathing space
+  \setlength{\baselineskip}{12pt}
+  % Allow to combine text & fig, even if text is just 1%
+  % SIs tend to have proportionally more figures, so give them more chances
+  % to be typeset with the text.
+  \l_preprint_set_supp_floatfractions:
+  % Make all figures and tables use 'h' position by default
+  \def\fps@figure{h}   % (see https://tex.stackexchange.com/a/11342)
+  \def\fps@table{h}
+  % Add "Supplementary Information" to the running heading (rest is copied from preprint.sty)
+
+  %%% Update headings %%%
+  % Show "Supplementary Information" (or equiv) in running header
+  \if_bool:N \l_preprint_fancy_headers_bool
+    \fancyhead[L]{\scshape  \tl_if_eq:NNTF \l_preprint_running_str \empty
+                                            {\l_preprint_title_str}
+                                            {\l_preprint_running_str}
+                  {}~--~\l_preprint_supplementary_str}
+  \fi:
+  % Make section titles centered
+  \l_preprint_suppheading_format:
+
+  %%% Print a title on the first page %%%
+  % Even though we are already in two-column layout, use \twocolumn so we can use its optional argument to typeset the "title" of the supplementary centered, at the top of the page
+  \cs_if_exist:NTF\l_preprint_title_str {
+    \cs_set:Nn \l_preprint_print_supptitle: {
+      \part{\l_preprint_title_str\\[1.5ex]--~Supplementary~Information~--}
+    } 
+  } {
+    \part{Supplementary~Information}
+  }
+  \if@twocolumn
+    % Use the optional argument of \twocolumn to center the
+    % Supplementary title on the page
+    \twocolumn[\vspace{-0.3in}
+               \l_preprint_print_supptitle:
+               \vspace{0.3in}]
+  \else
+    \l_preprint_print_supptitle:
+  \fi
+  \thispagestyle{empty}  % Don’t show running header on first page, like the main article
+
+
+  %%% Fix counters & cross references %%%
+
+  % NB: \stepcounter commands must come after the new \part;
+  %     the rest could be done earlier.
+
+  % Even if we number sections in the main text, SI sections are probably best left unnumbered. The SI already has referenceable headings "Supplementary Figures", "Supplementary Methods". SIs are typically less structured than appendices.
+  \setcounter{secnumdepth}{0}   
+  % Update how labels are displayed beside the eq or figure
+  \renewcommand{\theequation}{S\arabic{equation}}
+  \renewcommand{\figurename}{\l_preprint_supp_prefix_str\ Figure}  % NB: A `~` won’t produce
+  \renewcommand{\tablename}{\l_preprint_supp_prefix_str\ Table}    %     a space here.
+  \stepcounter{part}
+  \stepcounter{page}  % Page counter will reset to zero, but we want to restart at one
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%% End of Supplementary %%%%%%%%%%%%%%%%%%%%%%%%
+

@@ -1,0 +1,23 @@
+
+%%%%%%%%%%%%%%%%%%%%% Styling of the page head %%%%%%%%%%%%%%%%%%%%%%%
+% Requires: fancyhdr
+% Provides:
+%  - \l_preprint_set_pagestyle
+
+
+\cs_set:Nn \l_preprint_set_pagestyle: {
+  \RequirePackage{fancyhdr}
+  \fancyhf{}
+  \pagestyle{fancy}
+  \renewcommand{\headrulewidth}{0pt}
+  \fancyheadoffset{0pt}
+  \fancyhead[L]{\scshape  \tl_if_eq:NNTF \l_preprint_running_str \empty
+                                          {\l_preprint_title_str}
+                                          {\l_preprint_running_str}
+                \ifx\empty\l_preprint_status_str\empty\else{}~--~\l_preprint_status_str\fi}
+  \fancyhead[R]{\thepage}
+  %\rfoot{\thepage}
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

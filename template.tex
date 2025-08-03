@@ -1,0 +1,286 @@
+\documentclass[twocolumn]{article}
+
+% Author affiliations are managed with `authblk`
+% If you want to change how they are displayed, use `\PassOptionsToPackage{<opts>}{authblk}
+% before loading `preprint+`.
+
+% NB: The `onecolumn` and `twocolumn` options for `geom` set the page size to
+%     values taken from one col and two col templates respectively.
+%     So they may work better for one col, resp. two col, layouts, but otherwise
+%     there is no relation between the `geom` option and the class options.
+%     We do use the analogy to propose a sensible default however: if no value for `geom`
+%     is given, `onecolumn` (resp. `twocolumn`) is selected in one (resp. two) column layout.
+\usepackage[font=erewhon,status=preprint]{preprint+}
+
+
+%%%%%% Typography options %%%%%%%%%
+% preprint+ already loads [T1]{fontenc}, {microtype} by default, but you may consider the following:
+
+% \usepackage{siunitx}
+% \usepackage{xfrac}
+% \usepackage{mathrsfs}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%% Standard packages %%%%%%%%
+% These are all loaded by the SpringerNature template, which is quite basic.
+% As a consequence, it’s a good reference for a set of quasi-universal packages.
+\usepackage{graphicx}
+\usepackage{multirow}
+% \usepackage[mathlines,switch]{lineno}
+\usepackage{amsmath}
+% \usepackage{amssymb}   % Often included "by default", but will clash with some more modern font options. preprint+ automatically loads amssymb if it is compatible.
+\usepackage{amsthm}
+\usepackage[title]{appendix}
+\usepackage{xcolor}
+\usepackage{textcomp}
+\usepackage{booktabs}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%% Bibliography options %%%%%%
+\usepackage[numbers,square]{natbib}
+\bibliographystyle{unsrtnat}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%% Packages used in this template %%%%%%
+% There is a good chance you will want to remove these
+\usepackage{lipsum}
+\usepackage{xwatermark}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%% Packages for code listings %%%%%%%%
+% Many journals may still only accept `listings`, although minted produces much better highlighting.
+% (One reason is that minted requires an external run and/or files; see https://tex.stackexchange.com/questions/280590/work-around-for-minted-code-highlighting-in-arxiv)
+
+%\usepackage[frozencache,cachedir=minted_cache]{minted}
+%\usepackage{listings}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%% Packages for metadata %%%%%%%%%%%
+% You likely want to keep these if you use the template as-is,
+% but if your document class provides equivalent commands, use those instead.
+\usepackage{abstract}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+%% General packages
+\usepackage[colorlinks = true,
+            linkcolor = purple,
+            urlcolor  = blue,
+            citecolor = cyan,
+            anchorcolor = black]{hyperref}	% Color links to references, figures, etc.
+
+
+%%%%%%%%%%%%%%   Watermark   %%%%%%%%%%%%%%
+%   Add watermark with submission status  %
+% (AR: xwatermark triggers deprecation warnings; may want to consider alternatives)
+
+% Left watermark
+\newwatermark[firstpage,color=gray!60,angle=90,scale=0.32, xpos=-4.05in,ypos=0]{\href{https://doi.org/}{\color{gray}{Publication doi}}}
+% Right watermark
+\newwatermark[firstpage,color=gray!60,angle=90,scale=0.32, xpos=3.9in,ypos=0]{\href{https://doi.org/}{\color{gray}{Preprint doi}}}
+% Bottom watermark
+\newwatermark[firstpage,color=gray!90,angle=0,scale=0.28, xpos=0in,ypos=-5in]{*correspondence: \texttt{email@institution.edu}}
+
+%%%%%%%%%%%%%%%%  Front matter  %%%%%%%%%%%%%%%%
+
+% NB: To modify the look of the abstract, see docs of the `abstract` package.
+%     To modify the look of the authors & affiliation, see docs of the `authblk` package.
+
+\title{A preprint template for LaTeX users}
+
+\date{1 August 2025}
+  % NB: Using \today is not recommended for manuscripts uploaded to arXiv:
+  % https://info.arxiv.org/help/submit_tex.html#submissions-are-automatically-processed
+
+% \renewcommand*{\Authfont}{\bfseries}
+\author[1\thanks{\tt{asmith@college.edu}}\orcid{0000-0000-0000-0001}]{Alice Smith}
+\author[2\orcid{0000-0000-0000-0002}]{Bob Jones}
+
+\affil[1]{Department of Mathematics, University X}
+\affil[2]{Department of Biology, University Y}
+
+\abstract{%
+  Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut purus elit, vestibulum ut, placerat ac, adipiscing vitae, felis. Curabitur dictum gravida mauris. Nam arcu libero, nonummy eget, consectetuer id, vulputate a, magna. Donec vehicula augue eu neque. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Mauris ut leo. Cras viverra metus rhoncus sem. Nulla et lectus vestibulum urna fringilla ultrices. Phasellus eu tellus sit amet tortor gravida placerat. Integer sapien est, iaculis in, pretium quis, viverra ac, nunc. Praesent eget sem vel leo ultrices bibendum. Aenean faucibus. Morbi dolor nulla, malesuada eu, pulvinar at, mollis ac, nulla. Curabitur auctor semper nulla. Donec varius orci eget risus. Duis nibh mi, congue eu, accumsan eleifend, sagittis quis, diam. Duis eget orci sit amet orci dignissim rutrum. Nam dui ligula, fringilla a, euismod sodales, sollicitudin vel, wisi. Morbi auctor lorem non justo.%
+}
+
+\keywords{First keyword, Second keyword, More} % (optional)
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%    Main text    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\maketitle
+
+\section{Introduction}
+\lipsum[2]
+
+\lipsum[3]
+
+
+\section{Headings: first level}
+\label{sec:headings}
+
+\lipsum[7] See Section \ref{sec:headings}.
+
+\subsection{Headings: second level}
+\lipsum[5]
+\begin{equation}
+\xi _{ij}(t)= {\frac {\alpha _{i}(t)a^{w_t}_{ij}\beta _{j}(t+1)b^{v_{t+1}}_{j}(y_{t+1})}{\sum _{i=1}^{N} \sum _{j=1}^{N} \alpha _{i}(t)a^{w_t}_{ij}\beta _{j}(t+1)b^{v_{t+1}}_{j}(y_{t+1})}}
+\end{equation}
+
+\subsubsection{Headings: third level}
+\lipsum[6]
+
+\paragraph{Paragraph}
+\lipsum[7]
+
+\section{Examples of citations, figures, tables, references}
+\label{sec:others}
+\lipsum[8] \cite{kour2014real,kour2014fast} and see \cite{hadash2018estimate}.
+
+The documentation for \verb+natbib+ may be found at
+\begin{center}
+  \url{http://mirrors.ctan.org/macros/latex/contrib/natbib/natnotes.pdf}
+\end{center}
+Of note is the command \verb+\citet+, which produces citations
+appropriate for use in inline text.  For example,
+\begin{verbatim}
+   \citet{hasselmo} investigated\dots
+\end{verbatim}
+produces
+\begin{quote}
+  Hasselmo, et al.\ (1995) investigated\dots
+\end{quote}
+
+\begin{center}
+  \url{https://www.ctan.org/pkg/booktabs}
+\end{center}
+
+
+\subsection{Figures}
+\lipsum[10] 
+See Figure \ref{fig:fig1}. Here is how you add footnotes. %\footnote{Sample of the first footnote.}
+\lipsum[11] 
+
+\begin{figure}
+  \centering
+  \fbox{\rule[-.5cm]{4cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
+  \caption{Sample figure caption.}
+  \label{fig:fig1}
+\end{figure}
+
+\subsection{Tables}
+\lipsum[12]
+See awesome Table \ref{tab:table}.
+
+\begin{table}[H]
+ \caption{Sample table title}
+  \centering
+  \begin{tabular}{lll}
+    \toprule
+    \multicolumn{2}{c}{Part}                   \\
+    \cmidrule(r){1-2}
+    Name     & Description     & Size ($\mu$m) \\
+    \midrule
+    Dendrite & Input terminal  & $\sim$100     \\
+    Axon     & Output terminal & $\sim$10      \\
+    Soma     & Cell body       & up to $10^6$  \\
+    \bottomrule
+  \end{tabular}
+  \label{tab:table}
+\end{table}
+
+\subsection{Lists}
+\begin{itemize}
+\item Lorem ipsum dolor sit amet
+\item consectetur adipiscing elit. 
+\item Aliquam dignissim blandit est, in dictum tortor gravida eget. In ac rutrum magna.
+\end{itemize}
+
+%%%%%%%%%%%% Supplementary Methods %%%%%%%%%%%%
+%\footnotesize
+%\section*{Methods}
+
+%%%%%%%%%%%%% Acknowledgements %%%%%%%%%%%%%
+%\footnotesize
+%\section*{Acknowledgements}
+
+%%%%%%%%%%%%%%   Bibliography   %%%%%%%%%%%%%%
+\normalsize
+\bibliography{references}
+
+%%%%%%%%%%%%  Supplementary Figures  %%%%%%%%%%%%
+
+\appendix
+
+\section{Appendix section}
+
+\textbf{The Appendix is typeset as a normal column, after the references.}
+
+\lipsum[2]
+
+\lipsum[3]
+
+\begin{figure}
+  \centering
+  \fbox{\rule[-.5cm]{4cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
+  \caption{A figure in the appendix.}
+  \label{fig:appfig1}
+\end{figure}
+
+\lipsum[2]
+
+%%%%%%%%%%%%  Supplementary Figures  %%%%%%%%%%%%
+
+\supplementary
+
+\section{Supplementary section}
+
+\textbf{The Supplementary Information is typeset on a separate page, with its own title, so it can be distributed as a separate document.
+With the class option option \texttt{twoside}, the Supplementary will start on an odd page,
+so that it separates cleanly when printed on two-sided paper.}
+
+\lipsum[2]
+
+\lipsum[3]
+
+\lipsum[2]
+
+\lipsum[3]
+
+\lipsum[3]
+
+\section{Supplementary section}
+
+\textbf{Supplementary figures are prefixed with ``Supplementary''; see \ref{fig:suppfig1}.
+This can be changed with the \texttt{supplementaryprefix} package option.
+Supplementary figures are also given the \texttt{h} (``here'') option by default, to discourage them from floating too far.
+}
+
+\begin{figure}
+  \centering
+  \fbox{\rule[-.5cm]{4cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
+  \caption{A supplementary figure.}
+  \label{fig:suppfig1}
+\end{figure}
+
+\lipsum[3]
+
+\lipsum[2]
+
+\section{Supplementary references}
+
+\textbf{If your supplementary contains references, a simple way to print a separate, self-contained reference list is to use BibLaTeX's \texttt{\textbackslash newrefsection}. }
+
+%%%%%%%%%%%%%%%%   End   %%%%%%%%%%%%%%%%
+\end{document}

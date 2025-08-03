@@ -1,0 +1,54 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% Headings %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Requires: titlesec
+% Provides:
+%  - \l_preprint_heading_spacing:
+%  - \l_preprint_heading_format_bold:
+%  - \l_preprint_heading_format_sc:
+%  - \l_preprint_suppheading_format_bold:
+%  - \l_preprint_suppheading_format_sc:
+%  - \l_preprint_format_title:N
+%  - \l_preprint_title_format:  (internal)
+
+% TODO?: Rename to "decorations", and include conference notice?
+
+\cs_set:Nn \l_preprint_heading_spacing: {
+  % sections with less space
+  \titlespacing{\section}{0pt}{12pt plus 3pt minus 3pt}{1pt plus 1pt minus 1pt}
+  \titlespacing{\subsection}{0pt}{10pt plus 3pt minus 3pt}{1pt plus 1pt minus 1pt}
+  \titlespacing{\subsubsection}{0pt}{8pt plus 3pt minus 3pt}{1pt plus 1pt minus 1pt}
+}
+
+\cs_set:Nn  \l_preprint_title_format: {\LARGE\bfseries}
+\cs_set:Npn \l_preprint_format_title:N #1 {{\l_preprint_title_format: #1}}
+
+% Setting of abstractnamefont requires `abstract`, loaded in `frontmatter.sty`
+\cs_set:Nn \l_preprint_heading_format_bold: {
+  \cs_set:Nn  \l_preprint_title_format: {\LARGE\bfseries}
+  \renewcommand{\abstractnamefont}{\normalfont\large\bfseries}
+  \titleformat{\part}[display]{\filcenter\LARGE\bfseries}{}{0pt}{}{}  % Used to introduce supplementary material
+  \titleformat*{\section}{\large\bfseries\raggedright}
+  \titleformat*{\subsection}{\normalsize\bfseries\raggedright}
+  \titleformat*{\subsubsection}{\normalsize\itshape\raggedright}
+}
+\cs_set:Nn \l_preprint_heading_format_sc: {
+  \cs_set:Nn  \l_preprint_title_format: {\LARGE\scshape}
+  \renewcommand{\abstractnamefont}{\normalfont\large\bfseries\scshape}
+  \titleformat{\part}[display]{\filcenter\LARGE\scshape}{}{0pt}{}{}  % Used to introduce supplementary material
+  \titleformat*{\section}{\large\scshape\raggedright}
+  \titleformat*{\subsection}{\normalsize\itshape\raggedright}
+  \titleformat*{\subsubsection}{\normalsize\itshape\raggedright}
+}
+
+\cs_set:Nn \l_preprint_suppheading_format_bold: {
+    \titleformat*{\section}{\filcenter\large\bfseries}
+    \titleformat*{\subsection}{\filcenter\normalsize\bfseries}
+    \titleformat*{\subsubsection}{\filcenter\normalsize\itshape}
+}
+\cs_set:Nn \l_preprint_suppheading_format_sc: {
+    \titleformat*{\section}{\filcenter\large\scshape}
+    \titleformat*{\subsection}{\filcenter\normalsize\itshape}
+    \titleformat*{\subsubsection}{\filcenter\normalsize\itshape}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

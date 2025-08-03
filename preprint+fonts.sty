@@ -1,0 +1,67 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Fonts %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Loads: microtype, tikz (if erewhon)
+% Provides
+%  - \l_preprint_set_font_computer_modern:
+%  - \l_preprint_set_font_erewhon:
+%  - \l_preprint_set_font_times:
+%  - \l_preprint_set_font_venturis:
+% Side-effects:
+%  - Loads `microtype`, unless the `draft` option is passed.
+%  - Loads `tikz` if erewhon font option is selected
+
+% Microtype is an automatic beautifier for text.
+%  There are few reasons not to use it, other than the added compile time.
+\ifdraft{}{\usepackage{microtype}}
+
+\cs_set:Nn \l_preprint_set_font_computer_modern: {
+  % Default Computer Modern; we load amssymb for consistency with the other
+  % options, which also make macros like \mathbb available
+  % Similarly, other options load fontenc implicitly
+  \usepackage[T1]{fontenc}
+  \RequirePackage{amssymb}
+}
+
+\cs_set:Nn \l_preprint_set_font_erewhon: {
+  % This is how the erewhon docs suggest loading the font
+  % The erewhon font is a modern font, which looks very similar to times
+  % but with simpler shapes.
+  % Eg the y stem is straighter, and s loses its blocky serifs.
+  % The result is a text which typesets similarly, but noticeably lighter.
+  % Similarly, the Utopia math font has much simpler shapes, notable
+  % e.g. with the uppercase Q and black board fonts
+  % The typewriter font is sans serif: lighter & more modern than cmtt
+  \RequirePackage{tikz}
+  \usepackage[p,scaled=.98,space]{erewhon} % scaling by .98 not really necessary
+  \usepackage[varqu,varl]{inconsolata} % typewriter
+  \usepackage[type1,scaled=.95]{cabin} % sans serif like Gill Sans
+  \usepackage[utopia,vvarbb,amsthm]{newtxmath}   
+}
+
+\cs_set:Nn \l_preprint_set_font_times: {
+  % Use Times & Helvetica fonts for equations if available
+  % This option was hard-coded in the original preprint package
+  \IfFileExists{txfonts.sty}{
+    \RequirePackage{txfonts}   % Times-like font with math support
+    \gdef\ttdefault{cmtt}
+    \let\iint\relax      % AR: Presumably these were added to avoid
+    \let\iiint\relax     %     errors from symbols being defined twice.
+    \let\iiiint\relax    %     It would be nice to have a comment though,
+    \let\idotsint\relax  %     explaining why this is necessary
+    \let\openbox\relax
+  }{%
+    \RequirePackage{times}
+  }
+   % other font configurations
+  \renewcommand{\rmdefault}{ptm}
+  \renewcommand{\sfdefault}{phv}
+}
+
+\cs_set:Nn \l_preprint_set_font_venturis: {
+  % This is the closest available TeX font I found to Nature’s sans-serif, although my search was far from exhaustive.
+  % CAUTION: This is not fully tested and lacks a full font set (roman & math fonts are unchanged)
+  \usepackage[lf]{venturis}
+  \renewcommand*\familydefault{\sfdefault}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

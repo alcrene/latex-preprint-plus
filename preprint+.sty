@@ -1,0 +1,236 @@
+\NeedsTeXFormat{LaTeX2e}[2022-06-01]
+\ProvidesExplPackage{preprint+}{2025-07-25}{v0.1}{A flexible style for preprints and manuscripts}
+
+% This style file is based on the two-column template `preprint-template.tex` <github.com/brenhinkeller/preprint-template.tex>,
+% itself based on the one-column, NeurIPS-style `arxiv-style` <https://github.com/kourgeorge/arxiv-style>
+
+% The goal is to keep the general-purpose style of those templates, but make it more flexible.
+% In particular this template should be easier to use for publishing the preprint version
+% of a journal submissions.
+%    > The aforementioned styles are geared towards conference submissions, where the final paper
+%    > is typically produced with LaTeX.
+%    > In contrast, journals usually treat LaTeX purely as a markup language, which
+%    > strongly limits what kind of macros and packages are allowed.
+%
+% Ideally, one could simply remove `\usepackage{preprint+} from the source, and
+% get a paper which compiles with the journal’s own class / template.
+% This leads to the follow design considerations:
+%   - Minimal and standard dependencies
+%   - Everything is optional:
+%     + Users should be able to choose e.g. whether they want a4 or letter paper size.
+%     + Since any feature can potentially clash with another package, all features should be optional
+%   - But sane defaults
+%     + Replace `\usepackage{preprint}` with `\usepackage{preprint+}` should give the same, proven style.
+%   - Give more options for font and page geometry
+%     + Not only can a good font substantially improve the look, but it is useful
+%       for ensuring that we write in a way which fits the target journal.
+%     + For example, the best layout for equations and figures will depend both
+%       on the final column size and font.
+%       The "conference" styles in particular use a very compact math font,
+%       which is not necessarily representative of the published output.
+%   - Take care of as much _styling_ as possible, so they don’t need to add styling commands to the main source.
+%     + That way, at submission, all authors need to do is remove `\usepackage{preprint+}`.
+%     + This includes things like loading {microtype}
+%   - OTOH, providing only minimal additional functionality. This is a _style_ file.
+%     + This, again, is to make it as painless as possible to just remove `\usepackage{preprint+}`
+%   - Minimal changes to the LaTeX when switching to the journal template.
+%     In particular this means that providing an `{abstract}` environment,
+%     and macros for keywords and affiliations.
+%   - Avoid any feature that might lock an author into a particular package, such as the {multicol} for two column output.
+%   - Authors should be able to use the features they like and ignore the rest.
+%   - Support for a Supplementary Information document (which, in contrast to Appendix, are usually published as a separate PDF)
+%   - Instead of proposing many ways of doing things (e.g. twocolumn vs \usepackage{multicol}), propose one way and a way to turn it off
+%     + Exceptions: a few font and geometry options.
+%   - It should work with pdflatex, which will remain the only option for most journals for the foreseeable future.
+%     (Even arXiv still only supports pdflatex as of August 2025.)
+%  
+%
+% Providing such flexibility is made possible by the use of LaTeX 3 syntax, which has been available in the LaTeX2ε kernel since 2022.
+% This makes it _much_ easier to define long lists of options, without introducing any dependencies.
+% The ability to define complex sets of options makes it feasible to have an general-purpose,
+% flexible style package which nevertheless remains maintainable.
+
+% ALPHA STATE: Although this is already usable and provides improvements over the original `preprint-template`,
+%    many obvious features are left for future work.
+
+% COMPROMISE: In order to provide options which configure a complete set of fonts,
+%    we need to load fonts which sometimes clash 
+%    we need to load those fonts. Since font packages can only be loaded once,
+%    this means that the corresponding packages must not appear in the document
+%    preamble. In practice this means the `ammssymb`, which is part of many standard
+%    preamble, must NOT be loaded (because either it or an equivalent already is.)
+%    (`amsfonts` CAN be loaded, but there is no point, it is already loaded by `amssymb`)
+
+% Compared to `preprint-template.tex`, this package specifically does the following:
+% - Reimplements (most of) the logic with LaTeX3 syntax
+% - fixes a few visual glitches
+% - Adds options to make certain features optional:
+%   + tick marks
+%   + times font
+%   + set geometry of page
+%   + redefiniton of `{abstract}` environment. (Users are encouraged to use a standard package like `abstract` instead.)
+% - Removes unnecessarily hard-coded options (e.g. passing `letterpaper` to geometry)
+% - Don’t load natbib — this just makes it harder for users to pass options to it,
+%   or use another citation package.
+% - Changes the spacing before and after equations to prevent unsightly gaps
+%   (at the cost of making easier for the bottom of the two column not to line up)
+%   + In technical terms, we only use negative glue around equations.
+% - Uses a simpler implementation for the orcid macro, ported from https://github.com/myst-templates/arxiv_two_column
+% - Previously section spacing was defined in two different ways, in the .sty
+%   with standard low-level macros, and in the template with titlesec.
+%   Now titlesec is used throughout. (But with an option to turn it off if needed)
+% - Adds a \supplementary command, for supplementary information that will ultimately be submitted/published separately
+% - Inverts the ordering in the running header, so it is <title> -- <status>
+% - The hard-coded "Preprint" in heading is replaced by a <status> option,
+%   which can be empty.
+% - Add missing settings for `dbltopfraction` and `dblfloatpagefraction`.
+% - The `txfonts` are no longer loaded within an AtEndOfClass.
+%   This did not serve a clear purpose, made error messages more obscure, and caused weird errors with the package options
+% - Don’t default to \date{\today}, as this is not recommended for arXiv: https://info.arxiv.org/help/submit_tex.html#submissions-are-automatically-processed
+%   A date is only printed if authors explicitly set \date{}.
+% - Outdated code and unnecessary custom interface have been removed,
+%   resulting in a cleaner definitions and more standardized usage.
+%   In particular, we no longer redefine \maketitle, nor do we define three
+%   different macros \and, \And, and \AND. (Just the standard \and is used.)
+% - Interface more similar to many journal templates, with \abstract and \keywords
+%   defined in the preamble, and typeset alongside the title with \maketitle.
+
+% Some reasonable further goals would be:
+% - Provide a few more geometry options
+% - Anonymized option
+
+% More immediate todos:
+% TODO: Prevent margintick printing if setgeom=False, or allow setting different margins values
+% TODO: GitHub Action with some `sed -i` magic to create one `preprint+.sty` file with all `input` commands substituted, and automatically add that to the release assets
+% TODO: `titlesec=false` should force `headingstyle=none`
+% TODO: Add tests: A core text file, then a bunch of files which just change the
+%        package options and \input the rest from the core text file.
+
+\RequirePackage{ifdraft}
+
+\input{preprint+fonts.sty}
+\input{preprint+geom.sty}
+\input{preprint+headings.sty}    % Heading functions require {abstract} pkg, loaded in preprint+frontmatter.sty
+\input{preprint+layout.sty}
+\input{preprint+tikz.sty}
+\input{preprint+pagehead.sty}
+\input{preprint+frontmatter.sty}
+\input{preprint+supplementary.sty}
+
+
+% \bool_new:N \l_preprint_marginticks_bool
+\bool_new:N \l_preprint_orcid_bool
+\bool_new:N \l_preprint_fancy_headers_bool
+\bool_new:N \l_preprint_titlesec_bool
+\keys_define:nn { preprint }
+  {
+    % margin indicators are useful for proofing, but readers won’t care for them
+    marginticks.code:n = \RequirePackage{tikz,background}\l_preprint_draw_margin_ticks:,
+    % NB: Passing geom=none prevents loading the `geometry` package altogether
+    geom .choice:,
+    geom / twocolumn.code:n = \let\l_preprint_set_geom:\l_preprint_set_geom_preprint:,
+    geom / onecolumn.code:n = \let\l_preprint_set_geom:\l_preprint_set_geom_neurips:,
+    geom / natcomm  .code:n = \let\l_preprint_set_geom:\l_preprint_set_geom_natcomm:,
+    geom / none     .code:n = \let\l_preprint_set_geom:\relax,
+    geom / oneortwocol.code:n = \if@twocolumn\let\l_preprint_set_geom:\l_preprint_set_geom_preprint:\else\let\l_preprint_set_geom:\l_preprint_set_geom_neurips:\fi,
+    geom .initial:n = oneortwocol,  % Select either onecolumn or twocolumn based on the class option; assumes standard {article} class or similar (i.e. relies on \if@twocolumn)
+    % Whether to display ORCiDs icons beside author names
+    % This requires that TiKZ be loaded.
+    % (This option has no effect if an \orcid command already exists)
+    orcid      .bool_set:N = \l_preprint_orcid_bool,
+    orcid      .initial:n  = true,
+    % WIP: Configure header
+    % Currently this is just a boolean which turns the header on or off
+    % (turning it off also avoids loading the fancyhdr package)
+    fancyhdr   .bool_set:N = \l_preprint_fancy_headers_bool,
+    fancyhdr   .initial:n  = true,
+
+    runningtitle .str_set:N = \l_preprint_running_str,
+    runningtitle .initial:V = \empty,
+
+    % Same: Boolean to prevent loading titlesec
+    titlesec   .bool_set:N = \l_preprint_titlesec_bool,
+    titlesec   .initial:n  = true,
+
+    headingstyle .choice:,
+    headingstyle / bold      .code:n = {\let\l_preprint_heading_format:\l_preprint_heading_format_bold:
+                                        \let\l_preprint_suppheading_format:\l_preprint_suppheading_format_bold:},
+    headingstyle / smallcaps .code:n = {\let\l_preprint_heading_format:\l_preprint_heading_format_sc:
+                                        \let\l_preprint_suppheading_format:\l_preprint_suppheading_format_sc:},
+    headingstyle / none      .code:n = {\let\l_preprint_heading_format:\relax
+                                        \let\l_preprint_suppheading_format:\relax},
+    headingstyle .initial:n = bold,
+
+    status .str_set:N = \l_preprint_status_str,
+    status .initial:V = \empty,
+
+    % TODO: Multiple options (turn off supplementary, etc.), scoped under 'supplementary'
+    supplementarytitle .str_set:N = \l_preprint_supplementary_str,
+    supplementarytitle .initial:n = Supplementary~Information,
+
+    supplementaryprefix .str_set:N = \l_preprint_supp_prefix_str,  % Used in preprint+supplementary.sty
+    supplementaryprefix .initial:n = Supplementary,                % to set the text before "Fig." and "Table" in labels
+
+
+    % Encourage TeX to place floats alongside text instead of on a float page
+    % In technical terms, this increases the allowable text fractions,
+    % following the suggestions on the TeX FAQ: https://texfaq.org/FAQ-floats
+    floatplacement .choice:,
+    floatplacement / loose     .code:n = \let\l_preprint_set_floatfractions:\l_preprint_set_floatfractions_loose:,
+    floatplacement / medium    .code:n = \let\l_preprint_set_floatfractions:\l_preprint_set_floatfractions_medium:,
+    floatplacement / tight     .code:n = \let\l_preprint_set_floatfractions:\l_preprint_set_floatfractions_tight:,
+    floatplacement / extratight.code:n = \let\l_preprint_set_floatfractions:\l_preprint_set_floatfractions_extratight:,
+    floatplacement .initial:n = medium,
+
+    % Same options, for the placement of figures in the supplementary.
+    % This is used within preprint+supplementary.sty
+    suppfloatplacement .choice:,
+    suppfloatplacement / loose     .code:n = \let\l_preprint_set_supp_floatfractions:\l_preprint_set_floatfractions_loose:,
+    suppfloatplacement / medium    .code:n = \let\l_preprint_set_supp_floatfractions:\l_preprint_set_floatfractions_medium:,
+    suppfloatplacement / tight     .code:n = \let\l_preprint_set_supp_floatfractions:\l_preprint_set_floatfractions_tight:,
+    suppfloatplacement / extratight.code:n = \let\l_preprint_set_supp_floatfractions:\l_preprint_set_floatfractions_extratight:,
+    suppfloatplacement .initial:n = medium,
+
+    % Principle: Provide a few sane defaults.
+    % Users who want full control can pass `font=none` and set font themselves
+    font .choice:,            % Allowed values: none, cm, erewhon, times, venturis
+    font / none    .code:n = \let\l_preprint_set_font:\relax,
+    font / cm      .code:n = \let\l_preprint_set_font:\l_preprint_set_font_computer_modern:,
+    font / erewhon .code:n = \let\l_preprint_set_font:\l_preprint_set_font_erewhon:,
+    font / times   .code:n = \let\l_preprint_set_font:\l_preprint_set_font_times:,
+    font / venturis.code:n = \let\l_preprint_set_font:\l_preprint_set_font_venturis:,
+    font .initial:n = erewhon,
+  }
+
+\ProcessKeyOptions[preprint]
+
+% Deactivate \orcid macro if orcid=false
+\if_bool:N \l_preprint_orcid_bool
+\else: \renewcommand\orcid[1]{}
+\fi:
+
+\l_preprint_set_geom:
+\l_preprint_set_font:
+
+% Header options
+\if_bool:N \l_preprint_fancy_headers_bool
+  \RequirePackage{fancyhdr}
+  \l_preprint_set_pagestyle:
+\fi:
+
+% Page layout
+\l_preprint_font_sizes_and_skips:
+\l_preprint_caption_spacing:
+\l_preprint_foot_spacing:
+\l_preprint_parag_spacing:
+\l_preprint_list_spacing:
+\l_preprint_set_floatfractions:
+
+\if_bool:N \l_preprint_titlesec_bool
+  \usepackage{titlesec}
+  \l_preprint_heading_spacing:
+  \l_preprint_heading_format:
+\fi:
+
+
+\endinput

@@ -1,0 +1,180 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Page layout %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Provides:
+%  - \l_preprint_floatfractions_loose:
+%  - \l_preprint_floatfractions_medium:
+%  - \l_preprint_floatfractions_tight:
+%  - \l_preprint_floatfractions_extratight:
+%  - \l_preprint_fontsizes_and_skips:
+%  - \l_preprint_caption_spacing:
+%  - \l_preprint_foot_spacing:
+%  - \l_preprint_parag_spacing:
+%  - \l_preprint_list_spacing:
+% Side-effects:
+%  - Set \widowpenalty=10000
+%  - Set \clubpenalty=10000
+%  - Set \sloppy
+
+\cs_set:Nn \l_preprint_set_floatfractions_loose: {
+  % Based on LaTeX defaults, with a bit less propensity 
+  \renewcommand{\topfraction      }{0.7}
+  \renewcommand{\bottomfraction   }{0.4} %.3
+  \renewcommand{\textfraction     }{0.2}
+  \renewcommand{\floatpagefraction}{0.6} %.5
+  \renewcommand{\dbltopfraction   }{.7}
+  \renewcommand{\dblfloatpagefraction}{.7} % .5
+}
+\cs_set:Nn \l_preprint_set_floatfractions_medium: {
+  % The preprint-template.tex settings + dbl* settings, which were missing
+  \renewcommand{\topfraction      }{0.85}
+  \renewcommand{\bottomfraction   }{0.4}
+  \renewcommand{\textfraction     }{0.1}
+  \renewcommand{\floatpagefraction}{0.7}
+  \renewcommand{\dbltopfraction   }{.7} % .7
+  \renewcommand{\dblfloatpagefraction}{.7} % .5
+}
+\cs_set:Nn \l_preprint_set_floatfractions_tight: {
+  % The 'tight' settings try to avoid figure pages as much as possible,
+  % by allowing a smaller fraction of the page to be text.
+  \renewcommand{\topfraction}{.85} % .7
+  \renewcommand{\bottomfraction}{.7} % .3
+  \renewcommand{\textfraction}{.15} % .2
+  \renewcommand{\floatpagefraction}{.75} % .5
+  \renewcommand{\dbltopfraction}{.8} % .7
+  \renewcommand{\dblfloatpagefraction}{.75} % .5
+}
+\cs_set:Nn \l_preprint_set_floatfractions_extratight: {
+  % Even more aggressive settings for allowing text alongside figures.
+  % Suitable for a supplementary, where the figure/text ratio is high.
+  \renewcommand{\topfraction}{.9} % .7
+  \renewcommand{\bottomfraction}{.9} % .3
+  \renewcommand{\textfraction}{.1} % .2
+  \renewcommand{\floatpagefraction}{.75} % .5
+  \renewcommand{\dbltopfraction}{.85} % .7
+  \renewcommand{\dblfloatpagefraction}{.75} % .5
+}
+
+\widowpenalty=10000
+\clubpenalty=10000
+% \flushbottom  % Recommended (and already the default) with twocolumn, but can cause spacing around equations to blow up if they have positive glue
+\sloppy
+
+
+\cs_set:Nn \l_preprint_font_sizes_and_skips: {
+  % font sizes with reduced leading
+  % NB: Allowing any \@plus to these glues (even just 2\p@), will lead to TeX
+  %     preferring to add any amount of space below an equation rather than
+  %     making the text ragged at the bottom.
+  %     To allow use of \flushbottom (b/c we want flush bottoms if at all possible)
+  %     we define glues with more space to start with, but also more leeway to
+  %     reduce that glue.
+  %     Functionally this has the effect that TeX defaults to giving equations
+  %     a bit more space, which I kind of like.
+  \renewcommand{\normalsize}{%
+    \@setfontsize\normalsize\@xpt\@xipt
+    % Original vals
+    % \abovedisplayskip      7\p@ \@plus 2\p@ \@minus 5\p@
+    % \abovedisplayshortskip \z@ \@plus 3\p@
+    % \belowdisplayskip      \abovedisplayskip
+    % \belowdisplayshortskip 4\p@ \@plus 3\p@ \@minus 3\p@
+    % v1
+    % \abovedisplayskip      9\p@ \@minus 5\p@
+    % \abovedisplayshortskip 4\p@ \@minus 4\p@
+    % \belowdisplayskip      9\p@ \@minus 5\p@
+    % \belowdisplayshortskip 9\p@ \@minus 5\p@
+    \abovedisplayskip      10\p@ \@minus 4\p@
+    \abovedisplayshortskip 2\p@ \@minus 2\p@
+    \belowdisplayskip      10\p@ \@minus 4\p@
+    \belowdisplayshortskip 9\p@ \@minus 1\p@
+  }
+  \normalsize
+  \renewcommand{\small}{%
+    \@setfontsize\small\@ixpt\@xpt
+    % \abovedisplayskip      6\p@ \@plus 1.5\p@ \@minus 4\p@
+    % \abovedisplayshortskip \z@  \@plus 2\p@
+    % \belowdisplayskip      \abovedisplayskip
+    % \belowdisplayshortskip 3\p@ \@plus 2\p@   \@minus 2\p@
+    \abovedisplayskip      8\p@ \@minus 6\p@
+    \abovedisplayshortskip 5\p@ \@minus 4\p@
+    \belowdisplayskip      8\p@ \@minus 6\p@
+    \belowdisplayshortskip 8\p@ \@minus 6\p@
+  }
+  \renewcommand{\footnotesize}{\@setfontsize\footnotesize\@ixpt\@xpt}
+  \renewcommand{\scriptsize}{\@setfontsize\scriptsize\@viipt\@viiipt}
+  \renewcommand{\tiny}{\@setfontsize\tiny\@vipt\@viipt}
+  \renewcommand{\large}{\@setfontsize\large\@xiipt{14}}
+  \renewcommand{\Large}{\@setfontsize\Large\@xivpt{16}}
+  \renewcommand{\LARGE}{\@setfontsize\LARGE\@xviipt{20}}
+  \renewcommand{\huge}{\@setfontsize\huge\@xxpt{23}}
+  \renewcommand{\Huge}{\@setfontsize\Huge\@xxvpt{28}}
+}
+
+
+%%% Caption skips %%%
+\cs_set:Nn \l_preprint_caption_spacing: {
+  \newlength{\@abovecaptionskip}\setlength{\@abovecaptionskip}{7\p@}
+  \newlength{\@belowcaptionskip}\setlength{\@belowcaptionskip}{\z@}
+
+  \setlength{\abovecaptionskip}{\@abovecaptionskip}
+  \setlength{\belowcaptionskip}{\@belowcaptionskip}
+
+  % swap above/belowcaptionskip lengths for tables
+  \renewenvironment{table}
+    {\setlength{\abovecaptionskip}{\@belowcaptionskip}%
+     \setlength{\belowcaptionskip}{\@abovecaptionskip}%
+     \@float{table}}
+    {\end@float}
+}
+
+% footnote formatting
+\cs_set:Nn \l_preprint_foot_spacing: {
+  \setlength{\footnotesep }{6.65\p@}
+  \setlength{\skip\footins}{9\p@ \@plus 4\p@ \@minus 2\p@}
+  \renewcommand{\footnoterule}{\kern-3\p@ \hrule width 12pc \kern 2.6\p@}
+  \setcounter{footnote}{0}
+}
+
+% paragraph formatting
+\cs_set:Nn \l_preprint_parag_spacing: {
+  \setlength{\parindent}{\z@}
+  \setlength{\parskip  }{5.5\p@}
+}
+
+% list formatting
+\cs_set:Nn \l_preprint_list_spacing: {
+  \setlength{\topsep       }{4\p@ \@plus 1\p@   \@minus 2\p@}
+  \setlength{\partopsep    }{1\p@ \@plus 0.5\p@ \@minus 0.5\p@}
+  \setlength{\itemsep      }{2\p@ \@plus 1\p@   \@minus 0.5\p@}
+  \setlength{\parsep       }{2\p@ \@plus 1\p@   \@minus 0.5\p@}
+  \setlength{\leftmargin   }{3pc}
+  \setlength{\leftmargini  }{\leftmargin}
+  \setlength{\leftmarginii }{2em}
+  \setlength{\leftmarginiii}{1.5em}
+  \setlength{\leftmarginiv }{1.0em}
+  \setlength{\leftmarginv  }{0.5em}
+  \def\@listi  {\leftmargin\leftmargini}
+  \def\@listii {\leftmargin\leftmarginii
+                \labelwidth\leftmarginii
+                \advance\labelwidth-\labelsep
+                \topsep  2\p@ \@plus 1\p@    \@minus 0.5\p@
+                \parsep  1\p@ \@plus 0.5\p@ \@minus 0.5\p@
+                \itemsep \parsep}
+  \def\@listiii{\leftmargin\leftmarginiii
+                \labelwidth\leftmarginiii
+                \advance\labelwidth-\labelsep
+                \topsep    1\p@ \@plus 0.5\p@ \@minus 0.5\p@
+                \parsep    \z@
+                \partopsep 0.5\p@ \@plus 0\p@ \@minus 0.5\p@
+                \itemsep \topsep}
+  \def\@listiv {\leftmargin\leftmarginiv
+                \labelwidth\leftmarginiv
+                \advance\labelwidth-\labelsep}
+  \def\@listv  {\leftmargin\leftmarginv
+                \labelwidth\leftmarginv
+                \advance\labelwidth-\labelsep}
+  \def\@listvi {\leftmargin\leftmarginvi
+                \labelwidth\leftmarginvi
+                \advance\labelwidth-\labelsep}
+}
+
+%%%%%%%%%%%%%%%%%%%%% End of Page layout macros %%%%%%%%%%%%%%%%%%%%%%

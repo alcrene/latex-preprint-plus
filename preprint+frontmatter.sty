@@ -1,0 +1,157 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Frontmatter %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Loads: authblk, abstract
+% Provides:
+%  - \keywords
+%  - \abstract
+% Side effects:
+%  - Changes \maketitle to also print the abstract & keywords
+
+
+\RequirePackage{authblk}
+\RequirePackage{abstract}
+
+%%%%%%%%%%%%%% Keywords %%%%%%%%%%%%%%%%
+
+\cs_if_free:NTF\keywords {
+  \ProvideDocumentCommand{\keywords}{m}{\str_set:Nn \l_preprint_keywords_str {#1}}
+  \cs_set:Nn \l_preprint_print_keywords: {
+    \textbf{Keywords:}~\l_preprint_keywords_str
+  }
+}{
+  \cs_set:Nn \l_preprint_print_keywords: {}
+}
+
+
+%%%%%%%%%%%%%% Abstract %%%%%%%%%%%%%%
+
+\cs_if_free:NTF\abstract {
+  % If \abstract is not defined by the document class, just define it.
+  % It will work in both the preamble and the document body.
+  \NewDocumentCommand{\abstract}{m}{\str_set:Nn \l_preprint_abstract_str {#1}}
+} {
+  % If \abstract is already defined, we need to wrap it, because it is
+  % used internally by `\begin{abstract}`
+  % In this case \abstract{} will only work in the preamble, but that’s
+  % enough to emulate the format of many journal.
+  % https://tex.stackexchange.com/questions/16295/how-does-one-detect-whether-one-is-in-the-preamble-or-not
+  \cs_set_eq:NN \l_preprint_oldabstract \abstract
+  \DeclareDocumentCommand{\abstract}{m}{
+    \ifx\@onlypreamble\@notprerr
+      \l_preprint_oldabstract{#1}
+    \else
+      \str_set:Nn \l_preprint_abstract_str {#1}
+    \fi
+  }
+}
+
+
+%\newcommand{\abstractnamefont}{\normalfont\large\bfseries}
+  % abstractnamefont is set within preprint+headings.sty
+  % (Would it be better to set it here?)
+\renewcommand{\absleftindent}{0.5in}
+\renewcommand{\absrightindent}{0.5in}
+\renewcommand{\abstracttextfont}{\normalfont\normalsize}
+
+
+%%%%%%%%%%%%%%%% Authors %%%%%%%%%%%%%%%%
+
+\renewcommand{\Authfont}{\bfseries}  % This causes the whole, including 'and', to be bold
+\renewcommand{\Authsep}{,~}
+\renewcommand{\Authand}{~{\normalfont and}~}
+\renewcommand{\Authands}{,~{\normalfont and}~}
+
+
+
+%%%%%%%%%%%%%% Maketitle %%%%%%%%%%%%%%%%
+% % AR: I’m disinclined to reimplement \maketitle when we can get
+% %     visually indistinguishable results using the standard
+% %     implementation from the article class.
+% %     The "perfect author name centering" fix also seems to cause
+% %     overlaps when \thanks is used.
+% %     If the goal is is only to avoid deleting some variables like
+% %     \@title, we can do that more easily by wrapping those functions
+% %     ourselves.
+% \providecommand{\maketitle}{}
+% \renewcommand{\maketitle}{%
+%   \par
+%   \begingroup
+%     \renewcommand{\thefootnote}{\fnsymbol{footnote}}
+%     % \renewcommand{\@makefnmark}{\hbox to \z@{$^{\@thefnmark}$\hss}}
+%     % % The footnote-mark was overlapping the footnote-text,
+%     % % added the following to fix this problem               (MK)
+%     % \long\def\@makefntext##1{%
+%     %   \parindent 1em\noindent
+%     %   \hbox to 1.8em{\hss $\m@th ^{\@thefnmark}$}##1
+%     % }
+%     \thispagestyle{empty}
+%     \vspace*{-0.5cm}
+%     \@maketitle
+%     \@thanks
+%   \endgroup
+%   \let\maketitle\relax
+%   \let\thanks\relax
+% }
+
+% article’s \maketitle will flush the value in \@title.
+% We wrap \title to save the value in our own variable, so we can use
+% it later for the supplementary.
+\cs_set_eq:NN \l_preprint_oldtitle: \title
+\DeclareDocumentCommand{\title}{m}{
+  \str_set:Nn \l_preprint_title_str{#1}
+  \l_preprint_oldtitle:{#1}
+}
+
+% article’s \maketitle also emits `\thispagestyle{plain}` at the end,
+% which will print a page number in the footer.
+% We want to replace that with `\thispagestyle{empty}`
+\cs_set_eq:NN \l_preprint_oldmaketitle: \maketitle
+\DeclareDocumentCommand{\maketitle}{}{
+  \l_preprint_oldmaketitle:
+  \thispagestyle{empty}
+}
+
+% NB: The `article` class implements \maketitle by wrapping \@maketitle,
+%     which actually typeset the title, with higher level logic.
+%     For example, \maketitle will issue \twocolumn[\@maketitle] if
+%     we are in a two-column layout, so that the title is centered.
+%     By implementing only \@maketitle, we benefit from article’s wrapper.
+
+\date{}   % Make date blank by default, 
+\providecommand{\@maketitle}{}
+\renewcommand{\@maketitle}{%
+  \vspace*{-0.5cm}
+  \vbox{%
+    \hsize\textwidth
+    \linewidth\hsize
+    \centering
+    \l_preprint_format_title:N{\@title}\par
+    \vskip 0.1in
+    % NB: \today is not recommended for manuscripts uploaded to arXiv:
+    %     https://info.arxiv.org/help/submit_tex.html
+    \textsc{\l_preprint_status_str
+      \ifx \empty \@date
+        \empty
+      \else
+        \ifx \empty \l_preprint_status_str
+          Compiled~\@date
+        \else
+          ,~compiled~\@date
+        \fi
+    \fi}\\
+    % TODO?: Option for anonymous authors
+    \begin{tabular}[t]{c}\bfseries\rule{\z@}{24\p@}\@author\end{tabular}%
+    \vskip 0.2in
+    \cs_if_exist:NTF\l_preprint_abstract_str {
+      \begin{onecolabstract}
+        \l_preprint_abstract_str\par
+        \l_preprint_print_keywords:
+      \end{onecolabstract}
+    }{}  % end if
+    \vspace{0.35cm}
+  }
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% End of Frontmatter %%%%%%%%%%%%%%%%%%%%%%%%%%
+

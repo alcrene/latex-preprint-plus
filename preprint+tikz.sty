@@ -1,0 +1,50 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% TiKZ macros %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Requires: tikz, background
+% Provides:
+%  - \l_preprint_draw_margin_ticks:
+%  - \orcid
+
+% Add background margin tick marks
+\cs_set:Nn \l_preprint_draw_margin_ticks: {
+  \SetBgScale{1}
+  \SetBgAngle{0}
+  \SetBgColor{black}
+  \SetBgContents{%
+    \begin{tikzpicture}[remember~picture,overlay]
+      \ExplSyntaxOff
+      \node at (-3.55in,5.2in) {\rule{.4pt}{.4in}};
+      \node at (3.55in,5.2in) {\rule{.4pt}{.4in}};
+      \node at (-3.95in,4.8in) {\rule{.4in}{.4pt}};
+      \node at (3.95in,4.8in) {\rule{.4in}{.4pt}};
+      \node at (-3.55in,-5.2in) {\rule{.4pt}{.4in}};
+      \node at (3.55in,-5.2in) {\rule{.4pt}{.4in}};
+      \node at (-3.95in,-4.8in) {\rule{.4in}{.4pt}};
+      \node at (3.95in,-4.8in) {\rule{.4in}{.4pt}};
+      \ExplSyntaxOn
+    \end{tikzpicture}%
+  }
+}
+
+% Macro for producing ORCiDs icons, sourced from from MyST arxiv_two_column
+% Requires: tikz, xcolor
+\@ifundefined{orcid}{
+  \DeclareRobustCommand{\orcidicon}{
+    \definecolor{orcidlime}{HTML}{A6CE39}
+    \begin{tikzpicture}[scale=0.8]
+      \ExplSyntaxOff
+      \draw[orcidlime, fill=orcidlime] (0,0)
+      circle [radius=0.16]
+      node[white,scale=0.8] {{\fontfamily{qag}\selectfont \tiny ID}};
+      \draw[white, fill=white] (-0.0625,0.095)
+      circle [radius=0.007];
+      \ExplSyntaxOn
+    \end{tikzpicture}
+    % \hspace{-2mm}   % AR: Removed b/c it caused overlap with 'and'
+  }
+  \newcommand\orcid[1]{\href{https://orcid.org/#1}{\orcidicon}}
+}{
+  % noop: \orcid already defined
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

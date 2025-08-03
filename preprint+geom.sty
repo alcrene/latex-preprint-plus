@@ -1,0 +1,36 @@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%% Page geometry %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Provides
+%  - \l_preprint_set_geom_preprint:
+%  - \l_preprint_set_geom_neurips:
+%  - \l_preprint_set_geom_natcomm:
+
+\cs_set:Nn \l_preprint_set_geom_preprint: {
+  % Dimensions used by @brenhinkeller/preprint-template.tex
+  \RequirePackage[verbose=true,
+                  textheight=9.3in, 
+                  textwidth=7.1in,
+                  top=0.96in,
+                  headheight=0.15in,
+                  headsep=0.14in,
+                  footskip=0in         ]{geometry}
+}
+
+\cs_set:Nn \l_preprint_set_geom_neurips: {
+  % Dimensions used by @kourgeorge/arxiv-style
+  \RequirePackage[verbose=true,
+                  textheight=9in, 
+                  textwidth=6.5in,
+                  top=1in,
+                  headheight=14pt,
+                  headsep=25pt,
+                  footskip=30pt        ]{geometry}
+}
+
+\cs_set:Nn \l_preprint_set_geom_natcomm: {
+    % `total` dimensions measured on a 2025 Nature Communications article
+    \RequirePackage[total={184mm,253mm},headsep=2mm,centering]
+                   {geometry}
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
