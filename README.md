@@ -36,10 +36,10 @@ To get almost identical output to the original `preprint-template.tex`, use the 
             ]{preprint+}
 ```
 
-this will produce the output on the left. Note the use of the `times` font, typical of computer science conferences, which produces quite compact output. It’s also on the heavier side, with very thick serifs.
+this will produce the output on the right. Note the use of the `times` font, typical of computer science conferences, which produces quite compact output. It’s also on the heavier side, with very thick serifs.
 
-In contrast, the letter glyphs of the [`erewhon`](https://tug.org/FontCatalogue/erewhon/) aer similar to `times` but with notably lighter serifs.[^lighter-serifs]
-This option also selects a math font closer to what one finds in journals. The result, shown on the right, is a layout not quite as compact, but with a bit more space to breath.
+In contrast, the letter glyphs of the [`erewhon`](https://tug.org/FontCatalogue/erewhon/) are similar to `times` but with notably lighter serifs.[^lighter-serifs]
+This option also selects a math font closer to what one finds in journals. The result, shown on the left, is a layout not quite as compact, but with a bit more space to breath.
 (This example happens to exaggerate the size differences, because many lines in the default happen to have only one word.[^can-scale-erewhon])
 
 If you just `\usepackage{preprint+}` with default options, this is equivalent to
