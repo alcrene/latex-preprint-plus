@@ -7,16 +7,18 @@ This was forked from the [`preprint-template.tex`](https://github.com/brenhinkel
 
 - A rich collection of option flags making every feature optional.
   This allows authors to turn off features that may clash with the journal’s template.
-- Additional options to set fonts, title style and page dimensions.
-  + This is not an all-you-can eat template.
-    The idea is to provide a few useful sets of configurations,
-    so that authors are not locked in to using Times New Roman.
+- Additional options to set fonts, title style, page dimensions, running header….
+  + These are all features that are hard-coded in the original template.[^not-a-diss]
+  + This is not, however, an all-you-can-style template.
+    The idea is to provide a few useful sets of configurations, so that authors who’d rather think of other things than LaTeX styles nevertheless have a few options beyond Times New Roman font or letter-sized paper.
+  + Authors who _do_ want to think about a particular aspect of styling — be it the font style, title format, page geometry, etc. — can turn that feature off, and still benefit from not having to think about the other aspects.
 - A revised interface for specifying abstract and keywords in the preamble, and have them typeset as part of `\maketitle`. This is more in line with how one would prepare a manuscript using e.g. Springer-Nature’s or PNAS’ templates.
-- Added a `\supplementary` command for typesetting Supplementary material as part of the PDF. This allows cross-references between the main text and supplementary, while still making it easy to submit the latter to the journal as a separate file.
-  This is distinct from the `\appendix`, which is usually typeset as part of the text, just after references.
+- A new `\supplementary` command for typesetting Supplementary material as part of the PDF. This allows cross-references between the main text and supplementary, while still making it easy to submit the latter to the journal as a separate file.
+  + This complements the `\appendix` command, which in standard classes will typeset subsequent material as part of the text, just restarted numbering.
+  + Most journals/conferences will have _either_ a supplementary or an appendix, so their templates typically define `\appendix` (or the `appendix` package) to work with their style. Having both `\appendix` and `\supplementary` commands allows us to provide both layout formats; it also allows you to use both, for those cases where it would make sense.[^why-both]
 
-Under the hood, the style file has been completely rewritten in LaTeX3 syntax, which is how we are able to provide all of these options without it becoming an unmaintainable mess.
-In fact, the organization into separate files makes it _easier_ to maintain, despite the variety of options.
+Under the hood, the style file has been completely rewritten in LaTeX3 syntax,[^modern-latex] which is how we are able to provide all of these options without it becoming an unmaintainable mess.
+In fact, the organization into separate files arguably makes it _easier_ to maintain, despite the variety of options.
 For example, font options are easily added to `preprint+fonts.sty` by emulating one of the code blocks already there, and then adding a corresponding option under `font .choice:` in `preprint.sty`.
 
 ![](side-by-side_thumbnails.png)
@@ -34,9 +36,13 @@ To get almost identical output to the original `preprint-template.tex`, use the 
             ]{preprint+}
 ```
 
-this will produce the output on the left.
+this will produce the output on the left. Note the use of the `times` font, typical of computer science conferences, which produces quite compact output. It’s also on the heavier side, with very thick serifs.
 
-In contrast, if you just `\usepackage{preprint+}` with default options, this will produce the output on the right and is equivalent to
+In contrast, the letter glyphs of the [`erewhon`](https://tug.org/FontCatalogue/erewhon/) aer similar to `times` but with notably lighter serifs.[^lighter-serifs]
+This option also selects a math font closer to what one finds in journals. The result, shown on the right, is a layout not quite as compact, but with a bit more space to breath.
+(This example happens to exaggerate the size differences, because many lines in the default happen to have only one word.[^can-scale-erewhon])
+
+If you just `\usepackage{preprint+}` with default options, this is equivalent to
 
 ```latex
 \documentclass[twocolumn]{article}
@@ -47,6 +53,18 @@ In contrast, if you just `\usepackage{preprint+}` with default options, this wil
             headingstyle=bold,
             ]{preprint+}
 ```
+
+
+[^not-a-diss]: This is not to disparage the authors of the original templates. Before LaTeX3, providing multiple package options was a notoriously masochistic exercise, so it’s commonplace for style files to hard-code everything; users who want to modify anything are expected to do directly in the style file. If you’re thinking “but the whole point of using a `.sty` file is that I don’t _want_ to think about styling LaTeX documents”, that’s exactly what lead to `preprint+.sty`.
+
+[^why-both]: Physical Review is one example of a journal which allows for both, with Supplemental Material reserved for things like extensive data tables.
+
+[^modern-latex]: Native LaTeX3 support was added to the standard LaTeX kernel in June 2022. This means you will need a reasonably up to date version of LaTeX. If your version is older than this, you can still use the style files, but must add `\usepackage{expl3}` at the top of `preprint+.sty`. Notably, this will be the case if you are on Ubuntu LTS 22.04.
+
+[^lighter-serifs]: For example, the stem of the y is straighter, and the s loses its blocky serifs. The associated Utopia math font has much simpler shapes, notable e.g. with the uppercase Q and black board fonts.
+  This `erewhon` font option also selects the sans serif typewriter font [`inconsolata`](https://tug.org/FontCatalogue/inconsolata/). All of these choices are suggested by Erewhon’s documentation.
+
+[^can-scale-erewhon]: If you want to match the text capacity of the times option, you can change the scale of the Erewhon font; in our style file, it is loaded with `\usepackage[p,scaled=.98,space]{erewhon}`.
 
 ## Package options
 
@@ -93,9 +111,15 @@ In contrast, if you just `\usepackage{preprint+}` with default options, this wil
 
 ## Usage
 
-__Simple usage__: Download `preprint+_singlefile.sty` into the directory containing your TeX source, and rename it to `preprint+.sty`.[^GHA] Then `\usepackage{preprint+}` as usual.
+__Already have a TeX project?__:  Download `preprint+_singlefile.sty` into the directory containing your TeX source, and rename it to `preprint+.sty`.[^GHA] Then `\usepackage{preprint+}` as usual.
 
-__Advanced usage__: If you wish to modify the source, you should clone the directory. This way you benefit for the organization into separate files for making your modifications. Just make sure to clone somewhere in your TeX path, and you will be able to `\usepackage{preprint+}`.
+__Starting from scratch?__: Click the _Use this template_ at the top to create a new repository, rename _template.tex_ and start writing that file. This nets you:
+  - The `preprint+.sty` style itself.
+  - A useful `.gitignore` for keeping your project clean.
+  - A minimal `template.tex` to get you started.
+  - As a bonus, the organisation of the style into separate `preprint+*.sty` files makes it easy to adapt it to your needs.
+    - If you don’t need to modify the style, you can keep things simpler by renaming `preprint+_singlefile.sty` to `preprint+.sty`, and deleting the other `preprint+*.sty` files.
+    - To create your own combined style file, run `latexpand --keepcomments preprint+.sty > preprint+_singlefile.sty`.
 
 
 [^GHA]: Eventually I may have the combined file automatically produced with a GitHub Action, but for now renaming is the way to go.
