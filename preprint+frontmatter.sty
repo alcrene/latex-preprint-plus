@@ -6,7 +6,7 @@
 %  - \abstract
 % Side effects:
 %  - Changes \maketitle to also print the abstract & keywords
-
+%  - Stores the title in \l_preprint_title_str (since \@title is emptied by \maketitle)
 
 \RequirePackage{authblk}
 \RequirePackage{abstract}
@@ -129,16 +129,27 @@
     \vskip 0.1in
     % NB: \today is not recommended for manuscripts uploaded to arXiv:
     %     https://info.arxiv.org/help/submit_tex.html
-    \textsc{\l_preprint_status_str
-      \ifx \empty \@date
-        \empty
-      \else
-        \ifx \empty \l_preprint_status_str
-          Compiled~\@date
-        \else
-          ,~compiled~\@date
-        \fi
-    \fi}\\
+    \textsc{% Add the status marker
+            \tl_if_eq:NNTF \l_preprint_status_str \empty
+              {}{\l_preprint_status_str}
+            % Add the venue string, possibly prefixing with '--' separator
+            \tl_if_eq:NNTF \l_preprint_venue_str \empty
+              {}
+              {\tl_if_eq:NNTF \l_preprint_status_str \empty
+                  {}{\enspace--\enspace}
+               \l_preprint_venue_str}
+            % Add the compilation date.
+            % If nothing precedes, capitalize. Otherwise prefix with '--' separator
+            \tl_if_eq:NNTF \@date \empty 
+              {}
+              {\tl_if_eq:NNTF \l_preprint_venue_str \empty
+                {\tl_if_eq:NNTF \l_preprint_status_str \empty
+                  {Compiled~\@date}
+                  {\enspace--\enspace compiled~\@date}
+                }
+                {\enspace--\enspace compiled~\@date}
+              }
+    }\\
     % TODO?: Option for anonymous authors
     \begin{tabular}[t]{c}\bfseries\rule{\z@}{24\p@}\@author\end{tabular}%
     \vskip 0.2in

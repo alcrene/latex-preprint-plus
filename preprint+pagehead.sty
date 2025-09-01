@@ -4,6 +4,7 @@
 % Provides:
 %  - \l_preprint_set_pagestyle
 
+% See also preprint+supplementary, which sets the pagehead for the supplementary
 
 \cs_set:Nn \l_preprint_set_pagestyle: {
   \RequirePackage{fancyhdr}
@@ -12,12 +13,16 @@
   \renewcommand{\headrulewidth}{0pt}
   \fancyheadoffset{0pt}
   \fancyhead[L]{\scshape  \tl_if_eq:NNTF \l_preprint_running_str \empty
-                                          {\l_preprint_title_str}
-                                          {\l_preprint_running_str}
-                \ifx\empty\l_preprint_status_str\empty\else{}~--~\l_preprint_status_str\fi}
+                            {\l_preprint_title_str}
+                            {\l_preprint_running_str}
+                \tl_if_eq:NNTF \l_preprint_status_str \empty
+                  {}
+                  {{}~--~\l_preprint_status_str}
+                }
   \fancyhead[R]{\thepage}
   %\rfoot{\thepage}
 }
 
+% TODO: Define the supplementary pagehead here as well
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

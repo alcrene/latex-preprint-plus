@@ -80,9 +80,10 @@
 %   with standard low-level macros, and in the template with titlesec.
 %   Now titlesec is used throughout. (But with an option to turn it off if needed)
 % - Adds a \supplementary command, for supplementary information that will ultimately be submitted/published separately
-% - Inverts the ordering in the running header, so it is <title> -- <status>
-% - The hard-coded "Preprint" in heading is replaced by a <status> option,
-%   which can be empty.
+% - Inverts the ordering in the running header, so it is <title> -- Preprint 
+% - The inclusion of "Preprint" in the heading is now optional ('preprint' flag)
+% - An additional 'venue' optional allows for a free-from string to be
+%   printed below the title, where the old hard-coded 'Preprint' was printed.
 % - Add missing settings for `dbltopfraction` and `dblfloatpagefraction`.
 % - The `txfonts` are no longer loaded within an AtEndOfClass.
 %   This did not serve a clear purpose, made error messages more obscure, and caused weird errors with the package options
@@ -502,6 +503,7 @@
 % Provides:
 %  - \l_preprint_set_pagestyle
 
+% See also preprint+supplementary, which sets the pagehead for the supplementary
 
 \cs_set:Nn \l_preprint_set_pagestyle: {
   \RequirePackage{fancyhdr}
@@ -510,13 +512,17 @@
   \renewcommand{\headrulewidth}{0pt}
   \fancyheadoffset{0pt}
   \fancyhead[L]{\scshape  \tl_if_eq:NNTF \l_preprint_running_str \empty
-                                          {\l_preprint_title_str}
-                                          {\l_preprint_running_str}
-                \ifx\empty\l_preprint_status_str\empty\else{}~--~\l_preprint_status_str\fi}
+                            {\l_preprint_title_str}
+                            {\l_preprint_running_str}
+                \tl_if_eq:NNTF \l_preprint_status_str \empty
+                  {}
+                  {{}~--~\l_preprint_status_str}
+                }
   \fancyhead[R]{\thepage}
   %\rfoot{\thepage}
 }
 
+% TODO: Define the supplementary pagehead here as well
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
  
@@ -527,7 +533,7 @@
 %  - \abstract
 % Side effects:
 %  - Changes \maketitle to also print the abstract & keywords
-
+%  - Stores the title in \l_preprint_title_str (since \@title is emptied by \maketitle)
 
 \RequirePackage{authblk}
 \RequirePackage{abstract}
@@ -650,16 +656,27 @@
     \vskip 0.1in
     % NB: \today is not recommended for manuscripts uploaded to arXiv:
     %     https://info.arxiv.org/help/submit_tex.html
-    \textsc{\l_preprint_status_str
-      \ifx \empty \@date
-        \empty
-      \else
-        \ifx \empty \l_preprint_status_str
-          Compiled~\@date
-        \else
-          ,~compiled~\@date
-        \fi
-    \fi}\\
+    \textsc{% Add the status marker
+            \tl_if_eq:NNTF \l_preprint_status_str \empty
+              {}{\l_preprint_status_str}
+            % Add the venue string, possibly prefixing with '--' separator
+            \tl_if_eq:NNTF \l_preprint_venue_str \empty
+              {}
+              {\tl_if_eq:NNTF \l_preprint_status_str \empty
+                  {}{\enspace--\enspace}
+               \l_preprint_venue_str}
+            % Add the compilation date.
+            % If nothing precedes, capitalize. Otherwise prefix with '--' separator
+            \tl_if_eq:NNTF \@date \empty 
+              {}
+              {\tl_if_eq:NNTF \l_preprint_venue_str \empty
+                {\tl_if_eq:NNTF \l_preprint_status_str \empty
+                  {Compiled~\@date}
+                  {\enspace--\enspace compiled~\@date}
+                }
+                {\enspace--\enspace compiled~\@date}
+              }
+    }\\
     % TODO?: Option for anonymous authors
     \begin{tabular}[t]{c}\bfseries\rule{\z@}{24\p@}\@author\end{tabular}%
     \vskip 0.2in
@@ -749,6 +766,7 @@
 
   %%% Update headings %%%
   % Show "Supplementary Information" (or equiv) in running header
+  % Cf. preprint+pagehead, which sets the pagehead for the main text
   \if_bool:N \l_preprint_fancy_headers_bool
     \fancyhead[L]{\scshape  \tl_if_eq:NNTF \l_preprint_running_str \empty
                                             {\l_preprint_title_str}
@@ -843,6 +861,9 @@
 
     status .str_set:N = \l_preprint_status_str,
     status .initial:V = \empty,
+    venue    .str_set:N = \l_preprint_venue_str,
+    venue    .initial:V = \empty,
+
 
     % TODO: Multiple options (turn off supplementary, etc.), scoped under 'supplementary'
     supplementarytitle .str_set:N = \l_preprint_supplementary_str,
@@ -908,9 +929,14 @@
 
 \if_bool:N \l_preprint_titlesec_bool
   \usepackage{titlesec}
-  \l_preprint_heading_spacing:
-  \l_preprint_heading_format:
+\else:
+  \let\l_preprint_heading_spacing:\relax
+  \let\l_preprint_heading_format:\relax
+  \let\l_preprint_suppheading_spacing:\relax
+  \let\l_preprint_suppheading_format:\relax
 \fi:
+\l_preprint_heading_spacing:
+\l_preprint_heading_format:
 
 
  % 

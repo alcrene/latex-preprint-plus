@@ -76,8 +76,9 @@ If you just `\usepackage{preprint+}` with default options, this is equivalent to
 |            | none      | Don’t set the page size; don’t even load the `geometry` package. |
 | __headingstyle__| bold | Use bold face to demarcate headings. (default) |
 |            | smallcaps | Use small caps to demarcate headings. |
-|            | none      | Don’t style headings; let the class do so according to its defaluts. |
-| __status__ | \<str\>   | Arbitrary string, akin to a subtitle. Will also be printed in the running header. Typical values are "Preprint", "Under review", "Published in ___" |
+|            | none      | Don’t style headings; let the class do so according to its defaults. |
+| __status__ | \<str\>   | Arbitrary string which can be used to print a status marker below the header on the first page, and as part of the running header on subsequent pages. Typical values might be “Preprint” or “Under review” |
+| __venue__  | \<str\>   | Similar to `status`, but only printed below the title on the first page. Typical values might be "Accepted for publication in ___" or "Published in ___". Can also be used to display a status string on the first page without including it in the running header. |
 | __supplementarytitle__   | \<str\> | Arbitrary string. Printed below the article title at the start of the supplementary. Default: "Supplementary Information". |
 | __supplementaryprefix__  | \<str\> | Arbitrary string which is printed before "figure" or "table" for floats in the supplementary. Default: "Supplementary". |
 | __floatplacement__<br>/__suppfloatplacement__       | loose | Close to the default float placement values for the `article` class (although still a bit more permissive). Makes it difficult to place text alongside floats, so they are more likely to be placed by themselves on a float page. |
@@ -94,13 +95,15 @@ If you just `\usepackage{preprint+}` with default options, this is equivalent to
 
 ### Deactivation flags
 
+(Bold value indicates default)
+
 | Option   | Value     | Description |
 |----------|-----------|-------------|
-| __orcid__| true      | Provide an `\orcid` macro for creating ORCiD icons in affiliations. Will load `tikz` |
+| __orcid__| __true__  | Provide an `\orcid` macro for creating ORCiD icons in affiliations. Will load `tikz` |
 |          | false     | Don’t provide the macro.
-| __fancyhdr__ | true  | The `fancyhdr` package is used to produce the header & footer on each page. |
+| __fancyhdr__ | __true__ | The `fancyhdr` package is used to produce the header & footer on each page. |
 |              | false | `fancyhdr` is not loaded and header & footer are styled according to class defaults. |
-| __titlesec__ | true  | The `titlesec` package is used to style the section headers, as well as the title of the Supplementary Information (which is styled as a "part"). |
+| __titlesec__ | __true__ | The `titlesec` package is used to style the section headers, as well as the title of the Supplementary Information (which is styled as a "part"). |
 |              | false | `titlesec` is not loaded. Section and part titles keep their class defaults. |
 
 ### Other features:
@@ -119,7 +122,7 @@ __Starting from scratch?__: Click the _Use this template_ at the top to create a
   - A minimal `template.tex` to get you started.
   - As a bonus, the organisation of the style into separate `preprint+*.sty` files makes it easy to adapt it to your needs.
     - If you don’t need to modify the style, you can keep things simpler by renaming `preprint+_singlefile.sty` to `preprint+.sty`, and deleting the other `preprint+*.sty` files.
-    - To create your own combined style file, run `latexpand --keepcomments preprint+.sty > preprint+_singlefile.sty`.
+    - To create your own combined style file, run `latexpand --keep-comments preprint+.sty > preprint+_singlefile.sty`.
 
 
 [^GHA]: Eventually I may have the combined file automatically produced with a GitHub Action, but for now renaming is the way to go.

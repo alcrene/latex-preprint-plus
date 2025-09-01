@@ -71,6 +71,7 @@
 
   %%% Update headings %%%
   % Show "Supplementary Information" (or equiv) in running header
+  % Cf. preprint+pagehead, which sets the pagehead for the main text
   \if_bool:N \l_preprint_fancy_headers_bool
     \fancyhead[L]{\scshape  \tl_if_eq:NNTF \l_preprint_running_str \empty
                                             {\l_preprint_title_str}
