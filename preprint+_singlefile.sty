@@ -1,5 +1,7 @@
 \NeedsTeXFormat{LaTeX2e}[2022-06-01]
-\ProvidesExplPackage{preprint+}{2025-07-25}{v0.1}{A flexible style for preprints and manuscripts}
+\ProvidesExplPackage{preprint+}{2025-09-06}{v0.1}{A flexible style for preprints and manuscripts}
+
+% Copyright © 2025 Alexandre René
 
 % This style file is based on the two-column template `preprint-template.tex` <github.com/brenhinkeller/preprint-template.tex>,
 % itself based on the one-column, NeurIPS-style `arxiv-style` <https://github.com/kourgeorge/arxiv-style>
@@ -95,15 +97,20 @@
 %   different macros \and, \And, and \AND. (Just the standard \and is used.)
 % - Interface more similar to many journal templates, with \abstract and \keywords
 %   defined in the preamble, and typeset alongside the title with \maketitle.
+% - Add an option for whether or not to print "Abstract"
 
 % Some reasonable further goals would be:
 % - Provide a few more geometry options
+% - Allow passing options to abstract (workaround: \PassOptionsToPackage)
 % - Anonymized option
 
 % More immediate todos:
 % TODO: Prevent margintick printing if setgeom=False, or allow setting different margins values
+% TODO: Make marginticks a bool for consistency, so that `marginticks=false` does what we expect.
 % TODO: GitHub Action with some `sed -i` magic to create one `preprint+.sty` file with all `input` commands substituted, and automatically add that to the release assets
 % TODO: `titlesec=false` should force `headingstyle=none`
+% TODO: Allow to specify options for the `abstract` package; in particular, don’t force 'style'
+% TODO: Make loading of `authblk` and `abstract` optional.
 % TODO: Add tests: A core text file, then a bunch of files which just change the
 %        package options and \input the rest from the core text file.
 
@@ -181,7 +188,7 @@
 % Provides
 %  - \l_preprint_set_geom_preprint:
 %  - \l_preprint_set_geom_neurips:
-%  - \l_preprint_set_geom_natcomm:
+%  - \l_preprint_set_geom_nature:
 
 \cs_set:Nn \l_preprint_set_geom_preprint: {
   % Dimensions used by @brenhinkeller/preprint-template.tex
@@ -205,7 +212,7 @@
                   footskip=30pt        ]{geometry}
 }
 
-\cs_set:Nn \l_preprint_set_geom_natcomm: {
+\cs_set:Nn \l_preprint_set_geom_nature: {
     % `total` dimensions measured on a 2025 Nature Communications article
     \RequirePackage[total={184mm,253mm},headsep=2mm,centering]
                    {geometry}
@@ -225,6 +232,7 @@
 %  - \l_preprint_title_format:  (internal)
 
 % TODO?: Rename to "decorations", and include conference notice?
+% TODO?: Set abstract font in frontmatter.sty instead?
 
 \cs_set:Nn \l_preprint_heading_spacing: {
   % sections with less space
@@ -239,7 +247,7 @@
 % Setting of abstractnamefont requires `abstract`, loaded in `frontmatter.sty`
 \cs_set:Nn \l_preprint_heading_format_bold: {
   \cs_set:Nn  \l_preprint_title_format: {\LARGE\bfseries}
-  \renewcommand{\abstractnamefont}{\normalfont\large\bfseries}
+  \renewcommand{\abstractnamefont}{\normalfont\normalsize\bfseries}
   \titleformat{\part}[display]{\filcenter\LARGE\bfseries}{}{0pt}{}{}  % Used to introduce supplementary material
   \titleformat*{\section}{\large\bfseries\raggedright}
   \titleformat*{\subsection}{\normalsize\bfseries\raggedright}
@@ -247,7 +255,7 @@
 }
 \cs_set:Nn \l_preprint_heading_format_sc: {
   \cs_set:Nn  \l_preprint_title_format: {\LARGE\scshape}
-  \renewcommand{\abstractnamefont}{\normalfont\large\bfseries\scshape}
+  \renewcommand{\abstractnamefont}{\normalfont\normalsize\bfseries\scshape}
   \titleformat{\part}[display]{\filcenter\LARGE\scshape}{}{0pt}{}{}  % Used to introduce supplementary material
   \titleformat*{\section}{\large\scshape\raggedright}
   \titleformat*{\subsection}{\normalsize\itshape\raggedright}
@@ -529,14 +537,28 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Frontmatter %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Loads: authblk, abstract
 % Provides:
-%  - \keywords
-%  - \abstract
+%  - \keywords  (if undefined — otherwise unchanged)
+%  - \abstract  (if undefined — otherwise wrapped)
+%  - \l_preprint_set_abstract_format
+%  - \l_preprint_set_author_format
+%  - \l_preprint_create_or_wrap_abstract_command  (internal)
+% unless your document class already provides these commands.
+%
+% Wraps:
+%  - \title
+%  - \maketitle
+%  - \abstract (if already defined)
+%
+% Options: 
+%  - noabstracttitle: If provided, a) {abstract} is loaded with 'style' option
+%                                  b) "Abstract" is not printed
+%
 % Side effects:
 %  - Changes \maketitle to also print the abstract & keywords
 %  - Stores the title in \l_preprint_title_str (since \@title is emptied by \maketitle)
 
-\RequirePackage{authblk}
-\RequirePackage{abstract}
+  % \RequirePackage{abstract}
+  % \RequirePackage{authblk}
 
 %%%%%%%%%%%%%% Keywords %%%%%%%%%%%%%%%%
 
@@ -552,41 +574,60 @@
 
 %%%%%%%%%%%%%% Abstract %%%%%%%%%%%%%%
 
-\cs_if_free:NTF\abstract {
-  % If \abstract is not defined by the document class, just define it.
-  % It will work in both the preamble and the document body.
-  \NewDocumentCommand{\abstract}{m}{\str_set:Nn \l_preprint_abstract_str {#1}}
-} {
-  % If \abstract is already defined, we need to wrap it, because it is
-  % used internally by `\begin{abstract}`
-  % In this case \abstract{} will only work in the preamble, but that’s
-  % enough to emulate the format of many journal.
-  % https://tex.stackexchange.com/questions/16295/how-does-one-detect-whether-one-is-in-the-preamble-or-not
-  \cs_set_eq:NN \l_preprint_oldabstract \abstract
-  \DeclareDocumentCommand{\abstract}{m}{
-    \ifx\@onlypreamble\@notprerr
-      \l_preprint_oldabstract{#1}
-    \else
-      \str_set:Nn \l_preprint_abstract_str {#1}
-    \fi
+\cs_set:Nn \l_preprint_create_or_wrap_abstract_cmd: {
+  \cs_if_free:NTF\abstract {
+    % If \abstract is not defined by the document class, just define it.
+    % It will work in both the preamble and the document body.
+    % NB: Use \cs_set instead of \str_set so that commands in ##1 are expanded
+    \NewDocumentCommand{\abstract}{m}{\cs_set:Nn \l_preprint_abstract_content: {##1}}
+  } {
+    % If \abstract is already defined, we need to wrap it, because it is
+    % used internally by `\begin{abstract}`
+    % In this case \abstract{} will only work in the preamble, but that’s
+    % enough to emulate the format of many journals.
+    % https://tex.stackexchange.com/questions/16295/how-does-one-detect-whether-one-is-in-the-preamble-or-not
+    \cs_set_eq:NN \l_preprint_oldabstract \abstract
+    \DeclareDocumentCommand{\abstract}{m}{
+      \ifx\@onlypreamble\@notprerr
+        \l_preprint_oldabstract{##1}
+      \else
+        % NB: Use \cs_set instead of \str_set so that commands in ##1 are expanded
+        \cs_set:Nn \l_preprint_abstract_content: {##1}
+      \fi
+    }
   }
 }
 
-
-%\newcommand{\abstractnamefont}{\normalfont\large\bfseries}
-  % abstractnamefont is set within preprint+headings.sty
-  % (Would it be better to set it here?)
-\renewcommand{\absleftindent}{0.5in}
-\renewcommand{\absrightindent}{0.5in}
-\renewcommand{\abstracttextfont}{\normalfont\normalsize}
-
+%% \if_bool:N \l_preprint_use_abstract_bool
+\cs_set:Nn \l_preprint_set_abstract_format: {
+  \if_bool:N \l_preprint_no_abstract_title_bool
+    \PassOptionsToPackage{style}{abstract}
+  \fi:
+  \RequirePackage{abstract}
+  \l_preprint_create_or_wrap_abstract_cmd:  % This must be called after loading abstract
+  %\newcommand{\abstractnamefont}{\normalfont\large\bfseries}
+    % abstractnamefont is set within preprint+headings.sty
+    % (Would it be better to set it here? Issue: It depends on the font series.)
+  \renewcommand{\absleftindent}{0.5in}
+  \renewcommand{\absrightindent}{0.5in}
+  \renewcommand{\abstracttextfont}{\normalfont\small}
+  \if_bool:N \l_preprint_no_abstract_title_bool  % Don’t print "Abstract" title
+    \renewcommand{\abstitlestyle}[1]{}           % Requires the 'style' option to {abstract}
+  \fi:
+}
+%% \else:
+%% \l_preprint_create_or_wrap_abstract_cmd:
+%% \fi:
 
 %%%%%%%%%%%%%%%% Authors %%%%%%%%%%%%%%%%
 
-\renewcommand{\Authfont}{\bfseries}  % This causes the whole, including 'and', to be bold
-\renewcommand{\Authsep}{,~}
-\renewcommand{\Authand}{~{\normalfont and}~}
-\renewcommand{\Authands}{,~{\normalfont and}~}
+\cs_set:Nn \l_preprint_set_authors_format: {
+  \RequirePackage{authblk}
+  \renewcommand{\Authfont}{\bfseries}  % This causes the whole, including 'and', to be bold
+  \renewcommand{\Authsep}{,~}
+  \renewcommand{\Authand}{~{\normalfont and}~}
+  \renewcommand{\Authands}{,~{\normalfont and}~}
+}
 
 
 
@@ -680,9 +721,9 @@
     % TODO?: Option for anonymous authors
     \begin{tabular}[t]{c}\bfseries\rule{\z@}{24\p@}\@author\end{tabular}%
     \vskip 0.2in
-    \cs_if_exist:NTF\l_preprint_abstract_str {
+    \cs_if_exist:NTF\l_preprint_abstract_content: {
       \begin{onecolabstract}
-        \l_preprint_abstract_str\par
+        \l_preprint_abstract_content:\par
         \l_preprint_print_keywords:
       \end{onecolabstract}
     }{}  % end if
@@ -820,23 +861,33 @@
 \bool_new:N \l_preprint_orcid_bool
 \bool_new:N \l_preprint_fancy_headers_bool
 \bool_new:N \l_preprint_titlesec_bool
-\keys_define:nn { preprint }
+% \bool_new:N \l_preprint_use_abstract_bool
+\bool_new:N \l_preprint_no_abstract_title_bool
+\keys_define:nn { preprint+  }
   {
     % margin indicators are useful for proofing, but readers won’t care for them
     marginticks.code:n = \RequirePackage{tikz,background}\l_preprint_draw_margin_ticks:,
+
+    %%%%%%%%%%%%%% geom.sty %%%%%%%%%%%%%%
     % NB: Passing geom=none prevents loading the `geometry` package altogether
     geom .choice:,
     geom / twocolumn.code:n = \let\l_preprint_set_geom:\l_preprint_set_geom_preprint:,
     geom / onecolumn.code:n = \let\l_preprint_set_geom:\l_preprint_set_geom_neurips:,
-    geom / natcomm  .code:n = \let\l_preprint_set_geom:\l_preprint_set_geom_natcomm:,
+    geom / nature  .code:n = \let\l_preprint_set_geom:\l_preprint_set_geom_nature:,
     geom / none     .code:n = \let\l_preprint_set_geom:\relax,
     geom / oneortwocol.code:n = \if@twocolumn\let\l_preprint_set_geom:\l_preprint_set_geom_preprint:\else\let\l_preprint_set_geom:\l_preprint_set_geom_neurips:\fi,
     geom .initial:n = oneortwocol,  % Select either onecolumn or twocolumn based on the class option; assumes standard {article} class or similar (i.e. relies on \if@twocolumn)
+    
+
+    %%%%%%%%%%%%%% tikz.sty %%%%%%%%%%%%%%
     % Whether to display ORCiDs icons beside author names
     % This requires that TiKZ be loaded.
     % (This option has no effect if an \orcid command already exists)
     orcid      .bool_set:N = \l_preprint_orcid_bool,
     orcid      .initial:n  = true,
+
+
+    %%%%%%%%%%%% pagehead.sty %%%%%%%%%%%%
     % WIP: Configure header
     % Currently this is just a boolean which turns the header on or off
     % (turning it off also avoids loading the fancyhdr package)
@@ -846,6 +897,12 @@
     runningtitle .str_set:N = \l_preprint_running_str,
     runningtitle .initial:V = \empty,
 
+    status .str_set:N = \l_preprint_status_str,
+    status .initial:V = \empty,
+    venue    .str_set:N = \l_preprint_venue_str,
+    venue    .initial:V = \empty,
+
+    %%%%%%%%%%%% headings.sty %%%%%%%%%%%%
     % Same: Boolean to prevent loading titlesec
     titlesec   .bool_set:N = \l_preprint_titlesec_bool,
     titlesec   .initial:n  = true,
@@ -859,12 +916,16 @@
                                         \let\l_preprint_suppheading_format:\relax},
     headingstyle .initial:n = bold,
 
-    status .str_set:N = \l_preprint_status_str,
-    status .initial:V = \empty,
-    venue    .str_set:N = \l_preprint_venue_str,
-    venue    .initial:V = \empty,
 
+    %%%%%%%%%%% frontmatter.sty %%%%%%%%%%
 
+    % useabstract      .bool_set:N = \l_preprint_use_abstract_bool,
+    % useabstract      .initial:n = true,
+
+    noabstracttitle .bool_set:N = \l_preprint_no_abstract_title_bool,
+    noabstracttitle .initial:n = false,
+
+    %%%%%%%%% supplementary.sty %%%%%%%%%%
     % TODO: Multiple options (turn off supplementary, etc.), scoped under 'supplementary'
     supplementarytitle .str_set:N = \l_preprint_supplementary_str,
     supplementarytitle .initial:n = Supplementary~Information,
@@ -873,6 +934,7 @@
     supplementaryprefix .initial:n = Supplementary,                % to set the text before "Fig." and "Table" in labels
 
 
+    %%%%%%%%%%%%% layout.sty %%%%%%%%%%%%%
     % Encourage TeX to place floats alongside text instead of on a float page
     % In technical terms, this increases the allowable text fractions,
     % following the suggestions on the TeX FAQ: https://texfaq.org/FAQ-floats
@@ -883,6 +945,7 @@
     floatplacement / extratight.code:n = \let\l_preprint_set_floatfractions:\l_preprint_set_floatfractions_extratight:,
     floatplacement .initial:n = medium,
 
+    %%%%%% layout.sty + supplementary.sty %%%%%%
     % Same options, for the placement of figures in the supplementary.
     % This is used within preprint+supplementary.sty
     suppfloatplacement .choice:,
@@ -890,8 +953,9 @@
     suppfloatplacement / medium    .code:n = \let\l_preprint_set_supp_floatfractions:\l_preprint_set_floatfractions_medium:,
     suppfloatplacement / tight     .code:n = \let\l_preprint_set_supp_floatfractions:\l_preprint_set_floatfractions_tight:,
     suppfloatplacement / extratight.code:n = \let\l_preprint_set_supp_floatfractions:\l_preprint_set_floatfractions_extratight:,
-    suppfloatplacement .initial:n = medium,
+    suppfloatplacement .initial:n = extratight,
 
+    %%%%%%%%%%%%% fonts.sty %%%%%%%%%%%%%%
     % Principle: Provide a few sane defaults.
     % Users who want full control can pass `font=none` and set font themselves
     font .choice:,            % Allowed values: none, cm, erewhon, times, venturis
@@ -903,7 +967,7 @@
     font .initial:n = erewhon,
   }
 
-\ProcessKeyOptions[preprint]
+\ProcessKeyOptions[preprint+]
 
 % Deactivate \orcid macro if orcid=false
 \if_bool:N \l_preprint_orcid_bool
@@ -912,6 +976,10 @@
 
 \l_preprint_set_geom:
 \l_preprint_set_font:
+
+% Frontmatter options
+\l_preprint_set_abstract_format:  % Loads `abstract` pckg  -> Must be executed before setting headings
+\l_preprint_set_authors_format:   % Loads `authblk` pckg
 
 % Header options
 \if_bool:N \l_preprint_fancy_headers_bool

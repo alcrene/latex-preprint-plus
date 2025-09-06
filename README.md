@@ -116,7 +116,7 @@ If you just `\usepackage{preprint+}` with default options, this is equivalent to
 
 __Already have a TeX project?__:  Download `preprint+_singlefile.sty` into the directory containing your TeX source, and rename it to `preprint+.sty`.[^GHA] Then `\usepackage{preprint+}` as usual.
 
-__Starting from scratch?__: Click the _Use this template_ at the top to create a new repository, rename _template.tex_ and start writing that file. This nets you:
+__Starting from scratch?__: Click the _Use this template_ at the top to create a new repository, rename _template.tex_ and start writing in that file. This nets you:
   - The `preprint+.sty` style itself.
   - A useful `.gitignore` for keeping your project clean.
   - A minimal `template.tex` to get you started.
