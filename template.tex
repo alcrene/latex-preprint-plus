@@ -10,7 +10,7 @@
 %     there is no relation between the `geom` option and the class options.
 %     We do use the analogy to propose a sensible default however: if no value for `geom`
 %     is given, `onecolumn` (resp. `twocolumn`) is selected in one (resp. two) column layout.
-\usepackage[font=erewhon,status=Preprint]{preprint+}
+\usepackage[font=erewhon,status=Preprint,noabstracttitle]{preprint+}
 
 
 %%%%%% Typography options %%%%%%%%%
@@ -20,6 +20,18 @@
 % \usepackage{xfrac}
 % \usepackage{mathrsfs}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%% Typsetting options %%%%%%%%%
+% See https://www.tug.org/TUGboat/tb14-2/tb39taylor-para.pdf
+%     https://tex.stackexchange.com/a/50850
+
+\emergencystretch 2pt   % Give TeX a little bit of wiggle room if things don’t quite fit
+% \pretolerance = 150
+% \tolerance = 9999
+% \hbadness = 150
+\hfuzz=4pt
+\vfuzz=1pt
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%% Standard packages %%%%%%%%
@@ -41,10 +53,27 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-%%%%%% Bibliography options %%%%%%
-\usepackage[numbers,square]{natbib}
-\bibliographystyle{unsrtnat}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% Bibliography options 1: BibLaTeX %%%%%
+% NB: Currently arXiv references are not exported with biblatex fields
+% eprint, eprinttype, so the eprint and arxiv options don’t do anything.
+\usepackage[citestyle=numeric,
+            bibstyle=nature,
+            autocite=superscript,
+            pluralothers=true,
+            natbib=true,
+            url=false,doi=true,eprint=true,arxiv=abs
+            ]{biblatex}
+\DeclareFieldFormat{doi}{doi\addcolon\space\url{#1}}  % Add a space after 'doi:'
+\setcounter{biburlnumpenalty}{9000}  % Allow biblatex to break URLs
+\setcounter{biburllcpenalty}{7000}   % c.f. https://tex.stackexchange.com/a/134281
+\addbibresource{references.bib}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% %%%%%% Bibliography options 2: BibTeX %%%%%%
+% \usepackage[numbers,square]{natbib}
+% \bibliographystyle{unsrtnat}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 %%%%%% Packages used in this template %%%%%%
@@ -57,16 +86,19 @@
 %%%%%%%% Packages for code listings %%%%%%%%
 % Many journals may still only accept `listings`, although minted produces much better highlighting.
 % (One reason is that minted requires an external run and/or files; see https://tex.stackexchange.com/questions/280590/work-around-for-minted-code-highlighting-in-arxiv)
+% `piton` is probably the simplest to use & configure, but only works with LuaTeX
 
 %\usepackage[frozencache,cachedir=minted_cache]{minted}
 %\usepackage{listings}
+%\usepackage{piton}     % LuaLaTeX only
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 %%%%%%%%%% Packages for metadata %%%%%%%%%%%
-% You likely want to keep these if you use the template as-is,
-% but if your document class provides equivalent commands, use those instead.
-\usepackage{abstract}
+% preprint+ already loads
+%     \usepackage{abstract}
+%     \usepackage{authblk}
+% but you may load alternative packages here
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -94,6 +126,12 @@
 
 % NB: To modify the look of the abstract, see docs of the `abstract` package.
 %     To modify the look of the authors & affiliation, see docs of the `authblk` package.
+% NB: Both `abstract` and `authblk` are loaded by preprint+
+%     This means you need to preemptively pass options to them.
+%     For example, if you want to use the 'runin' option, you would use
+%         \PassOptionsToPackage{runin}{abstract}
+%     before loading preprint+ above.
+%     Note that abstract is already loaded with the 'style' option.
 
 \title{A preprint template for LaTeX users}
 
@@ -108,8 +146,11 @@
 \affil[1]{Department of Mathematics, University X}
 \affil[2]{Department of Biology, University Y}
 
+% Abstract can include formatting commands like \emph and \hyperref.
+% Whether you _should_ formatting is up to you (and whether you can is up to your target journal.)
+% Note that commands with movable arguments, like \footnote, are not supported.
 \abstract{%
-  Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Ut purus elit, vestibulum ut, placerat ac, adipiscing vitae, felis. Curabitur dictum gravida mauris. Nam arcu libero, nonummy eget, consectetuer id, vulputate a, magna. Donec vehicula augue eu neque. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Mauris ut leo. Cras viverra metus rhoncus sem. Nulla et lectus vestibulum urna fringilla ultrices. Phasellus eu tellus sit amet tortor gravida placerat. Integer sapien est, iaculis in, pretium quis, viverra ac, nunc. Praesent eget sem vel leo ultrices bibendum. Aenean faucibus. Morbi dolor nulla, malesuada eu, pulvinar at, mollis ac, nulla. Curabitur auctor semper nulla. Donec varius orci eget risus. Duis nibh mi, congue eu, accumsan eleifend, sagittis quis, diam. Duis eget orci sit amet orci dignissim rutrum. Nam dui ligula, fringilla a, euismod sodales, sollicitudin vel, wisi. Morbi auctor lorem non justo.%
+  \emph{Lorem ipsum} dolor sit amet, consectetuer adipiscing \textbf{elit}. \hyperref[sec:appendix]{Ut purus elit, vestibulum ut, placerat ac, adipiscing vitae, felis.} Curabitur dictum gravida mauris. Nam arcu libero, nonummy eget, consectetuer id, vulputate a, magna. Donec vehicula augue eu neque. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. \emph{Mauris ut leo.} Cras viverra metus rhoncus sem. Nulla et lectus vestibulum urna fringilla ultrices. Phasellus eu tellus sit amet tortor gravida placerat. Integer sapien est, iaculis in, pretium quis, viverra ac, nunc. Praesent eget sem vel leo ultrices bibendum. Aenean faucibus. Morbi dolor nulla, malesuada eu, pulvinar at, mollis ac, nulla. Curabitur auctor semper nulla. Donec varius orci eget risus. Duis nibh mi, congue eu, accumsan eleifend, sagittis quis, diam. Duis eget orci sit amet orci dignissim rutrum. Nam dui ligula, fringilla a, euismod sodales, sollicitudin vel, wisi. Morbi auctor lorem non justo.%
 }
 
 \keywords{First keyword, Second keyword, More} % (optional)
@@ -207,8 +248,8 @@ See awesome Table \ref{tab:table}.
 \item Aliquam dignissim blandit est, in dictum tortor gravida eget. In ac rutrum magna.
 \end{itemize}
 
-%%%%%%%%%%%% Supplementary Methods %%%%%%%%%%%%
-%\footnotesize
+%%%%%%%%%%%%%%%%  Methods  %%%%%%%%%%%%%%%%%
+%\small
 %\section*{Methods}
 
 %%%%%%%%%%%%% Acknowledgements %%%%%%%%%%%%%
@@ -217,13 +258,18 @@ See awesome Table \ref{tab:table}.
 
 %%%%%%%%%%%%%%   Bibliography   %%%%%%%%%%%%%%
 \normalsize
-\bibliography{references}
+% \bibliography{references}   % BibTeX
 
-%%%%%%%%%%%%  Supplementary Figures  %%%%%%%%%%%%
+\emergencystretch 4pt   % Make it easier to typeset bibliographies without overflow
+\printbibliography
+\emergencystretch 2pt   % Or whatever the previous setting was
+
+%%%%%%%%%%%%%%%%   Appendix   %%%%%%%%%%%%%%%%
 
 \appendix
 
 \section{Appendix section}
+\label{sec:appendix}
 
 \textbf{The Appendix is typeset as a normal column, after the references.}
 
@@ -243,12 +289,15 @@ See awesome Table \ref{tab:table}.
 %%%%%%%%%%%%  Supplementary Figures  %%%%%%%%%%%%
 
 \supplementary
+\newrefsection  % (BibLaTeX only): Use a separate list of references for the supplementary
 
 \section{Supplementary section}
 
 \textbf{The Supplementary Information is typeset on a separate page, with its own title, so it can be distributed as a separate document.
 With the class option option \texttt{twoside}, the Supplementary will start on an odd page,
 so that it separates cleanly when printed on two-sided paper.}
+
+A reference in the supplementary: \cite{kour2014fast}.
 
 \lipsum[2]
 
@@ -278,9 +327,14 @@ Supplementary figures are also given the \texttt{h} (``here'') option by default
 
 \lipsum[2]
 
+%%%%  Supplementary References  %%%%
+
 \section{Supplementary references}
 
 \textbf{If your supplementary contains references, a simple way to print a separate, self-contained reference list is to use BibLaTeX's \texttt{\textbackslash newrefsection}. }
+
+\emergencystretch 4pt   % Make it easier to typeset bibliographies without overflow
+\printbibliography
 
 %%%%%%%%%%%%%%%%   End   %%%%%%%%%%%%%%%%
 \end{document}
