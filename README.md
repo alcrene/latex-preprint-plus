@@ -125,7 +125,7 @@ __Starting from scratch?__: Click the _Use this template_ at the top to create a
   - A minimal `template.tex` to get you started.
   - As a bonus, the organisation of the style into separate `preprint+*.sty` files makes it easy to adapt it to your needs.
     - If you don’t need to modify the style, you can keep things simpler by renaming `preprint+_singlefile.sty` to `preprint+.sty`, and deleting the other `preprint+*.sty` files.
-    - To create your own combined style file, run `latexpand --keep-comments preprint+.sty > preprint+_singlefile.sty`.
+    - To update the combined style file after making changes, run `latexpand --keep-comments preprint+.sty > preprint+_singlefile.sty`.
 
 
 [^GHA]: Eventually I may have the combined file automatically produced with a GitHub Action, but for now renaming is the way to go.
