@@ -1,6 +1,8 @@
 \NeedsTeXFormat{LaTeX2e}[2022-06-01]
 \ProvidesExplPackage{preprint+}{2025-07-25}{v0.1}{A flexible style for preprints and manuscripts}
 
+% Copyright © 2025 Alexandre René
+
 % This style file is based on the two-column template `preprint-template.tex` <github.com/brenhinkeller/preprint-template.tex>,
 % itself based on the one-column, NeurIPS-style `arxiv-style` <https://github.com/kourgeorge/arxiv-style>
 
@@ -95,15 +97,20 @@
 %   different macros \and, \And, and \AND. (Just the standard \and is used.)
 % - Interface more similar to many journal templates, with \abstract and \keywords
 %   defined in the preamble, and typeset alongside the title with \maketitle.
+% - Add an option for whether or not to print "Abstract"
 
 % Some reasonable further goals would be:
 % - Provide a few more geometry options
+% - Allow passing options to abstract (workaround: \PassOptionsToPackage)
 % - Anonymized option
 
 % More immediate todos:
 % TODO: Prevent margintick printing if setgeom=False, or allow setting different margins values
+% TODO: Make marginticks a bool for consistency, so that `marginticks=false` does what we expect.
 % TODO: GitHub Action with some `sed -i` magic to create one `preprint+.sty` file with all `input` commands substituted, and automatically add that to the release assets
 % TODO: `titlesec=false` should force `headingstyle=none`
+% TODO: Allow to specify options for the `abstract` package; in particular, don’t force 'style'
+% TODO: Make loading of `authblk` and `abstract` optional.
 % TODO: Add tests: A core text file, then a bunch of files which just change the
 %        package options and \input the rest from the core text file.
 
@@ -123,12 +130,14 @@
 \bool_new:N \l_preprint_orcid_bool
 \bool_new:N \l_preprint_fancy_headers_bool
 \bool_new:N \l_preprint_titlesec_bool
-\keys_define:nn { preprint }
 % \bool_new:N \l_preprint_use_abstract_bool
 \bool_new:N \l_preprint_no_abstract_title_bool
+\keys_define:nn { preprint+  }
   {
     % margin indicators are useful for proofing, but readers won’t care for them
     marginticks.code:n = \RequirePackage{tikz,background}\l_preprint_draw_margin_ticks:,
+
+    %%%%%%%%%%%%%% geom.sty %%%%%%%%%%%%%%
     % NB: Passing geom=none prevents loading the `geometry` package altogether
     geom .choice:,
     geom / twocolumn.code:n = \let\l_preprint_set_geom:\l_preprint_set_geom_preprint:,
@@ -137,11 +146,17 @@
     geom / none     .code:n = \let\l_preprint_set_geom:\relax,
     geom / oneortwocol.code:n = \if@twocolumn\let\l_preprint_set_geom:\l_preprint_set_geom_preprint:\else\let\l_preprint_set_geom:\l_preprint_set_geom_neurips:\fi,
     geom .initial:n = oneortwocol,  % Select either onecolumn or twocolumn based on the class option; assumes standard {article} class or similar (i.e. relies on \if@twocolumn)
+    
+
+    %%%%%%%%%%%%%% tikz.sty %%%%%%%%%%%%%%
     % Whether to display ORCiDs icons beside author names
     % This requires that TiKZ be loaded.
     % (This option has no effect if an \orcid command already exists)
     orcid      .bool_set:N = \l_preprint_orcid_bool,
     orcid      .initial:n  = true,
+
+
+    %%%%%%%%%%%% pagehead.sty %%%%%%%%%%%%
     % WIP: Configure header
     % Currently this is just a boolean which turns the header on or off
     % (turning it off also avoids loading the fancyhdr package)
@@ -151,6 +166,12 @@
     runningtitle .str_set:N = \l_preprint_running_str,
     runningtitle .initial:V = \empty,
 
+    status .str_set:N = \l_preprint_status_str,
+    status .initial:V = \empty,
+    venue    .str_set:N = \l_preprint_venue_str,
+    venue    .initial:V = \empty,
+
+    %%%%%%%%%%%% headings.sty %%%%%%%%%%%%
     % Same: Boolean to prevent loading titlesec
     titlesec   .bool_set:N = \l_preprint_titlesec_bool,
     titlesec   .initial:n  = true,
@@ -164,10 +185,8 @@
                                         \let\l_preprint_suppheading_format:\relax},
     headingstyle .initial:n = bold,
 
-    status .str_set:N = \l_preprint_status_str,
-    status .initial:V = \empty,
-    venue    .str_set:N = \l_preprint_venue_str,
-    venue    .initial:V = \empty,
+
+    %%%%%%%%%%% frontmatter.sty %%%%%%%%%%
 
     % useabstract      .bool_set:N = \l_preprint_use_abstract_bool,
     % useabstract      .initial:n = true,
@@ -175,6 +194,7 @@
     noabstracttitle .bool_set:N = \l_preprint_no_abstract_title_bool,
     noabstracttitle .initial:n = false,
 
+    %%%%%%%%% supplementary.sty %%%%%%%%%%
     % TODO: Multiple options (turn off supplementary, etc.), scoped under 'supplementary'
     supplementarytitle .str_set:N = \l_preprint_supplementary_str,
     supplementarytitle .initial:n = Supplementary~Information,
@@ -183,6 +203,7 @@
     supplementaryprefix .initial:n = Supplementary,                % to set the text before "Fig." and "Table" in labels
 
 
+    %%%%%%%%%%%%% layout.sty %%%%%%%%%%%%%
     % Encourage TeX to place floats alongside text instead of on a float page
     % In technical terms, this increases the allowable text fractions,
     % following the suggestions on the TeX FAQ: https://texfaq.org/FAQ-floats
@@ -193,6 +214,7 @@
     floatplacement / extratight.code:n = \let\l_preprint_set_floatfractions:\l_preprint_set_floatfractions_extratight:,
     floatplacement .initial:n = medium,
 
+    %%%%%% layout.sty + supplementary.sty %%%%%%
     % Same options, for the placement of figures in the supplementary.
     % This is used within preprint+supplementary.sty
     suppfloatplacement .choice:,
@@ -202,6 +224,7 @@
     suppfloatplacement / extratight.code:n = \let\l_preprint_set_supp_floatfractions:\l_preprint_set_floatfractions_extratight:,
     suppfloatplacement .initial:n = extratight,
 
+    %%%%%%%%%%%%% fonts.sty %%%%%%%%%%%%%%
     % Principle: Provide a few sane defaults.
     % Users who want full control can pass `font=none` and set font themselves
     font .choice:,            % Allowed values: none, cm, erewhon, times, venturis
@@ -213,7 +236,7 @@
     font .initial:n = erewhon,
   }
 
-\ProcessKeyOptions[preprint]
+\ProcessKeyOptions[preprint+]
 
 % Deactivate \orcid macro if orcid=false
 \if_bool:N \l_preprint_orcid_bool
