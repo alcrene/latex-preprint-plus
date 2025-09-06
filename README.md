@@ -70,13 +70,14 @@ If you just `\usepackage{preprint+}` with default options, this is equivalent to
 
 | Option     | Value     | Description |
 |------------|-----------|-------------|
-| __geom__   | twocolumn | Page dimensions of `preprint-template.tex`, designed for two column output. Default option for `\documentclass[twocolumn]`. |
-|            | onecolum  | Page dimensions of the `arxiv-style`, designed for one column output. Default option for `\documentclass[onecolumn]`. |
-|            | natcomm   | A text area approximating that of the Nature Communications layout. A good choice if you want minimal margins. |
+| __geom__   | twocolumn | Page dimensions of [`preprint-template.tex`](https://github.com/brenhinkeller/preprint-template.tex), designed for two column output. Default option for `\documentclass[twocolumn]`. Works best with letter paper size. |
+|            | onecolum  | Page dimensions of the [`arxiv-style`](https://github.com/kourgeorge/arxiv-style), designed for one column output. Default option for `\documentclass[onecolumn]`. Works best with letter paper size. |
+|            | nature    | A text area approximating that of the Nature article layout. Values are those of [`Nature_Letter_LaTeX_template`](https://github.com/granttremblay/Nature_Letter_LaTeX_template). A good choice if you want minimal margins. (Indeed, the arXiv watermark fits very tightly in the left margin of the first page with this layout.) Works best with A4 paper size. |
 |            | none      | Don’t set the page size; don’t even load the `geometry` package. |
-| __headingstyle__| bold | Use bold face to demarcate headings. (default) |
+| __headingstyle__| bold | (default) Use bold face to demarcate headings. |
 |            | smallcaps | Use small caps to demarcate headings. |
 |            | none      | Don’t style headings; let the class do so according to its defaults. |
+| __runningtitle__| \<str\> | Arbitrary string to print in the running header at the top left of the page. If not specified, the title is used. Usually this is used to specify a shortened title. |
 | __status__ | \<str\>   | Arbitrary string which can be used to print a status marker below the header on the first page, and as part of the running header on subsequent pages. Typical values might be “Preprint” or “Under review” |
 | __venue__  | \<str\>   | Similar to `status`, but only printed below the title on the first page. Typical values might be "Accepted for publication in ___" or "Published in ___". Can also be used to display a status string on the first page without including it in the running header. |
 | __supplementarytitle__   | \<str\> | Arbitrary string. Printed below the article title at the start of the supplementary. Default: "Supplementary Information". |
@@ -105,6 +106,8 @@ If you just `\usepackage{preprint+}` with default options, this is equivalent to
 |              | false | `fancyhdr` is not loaded and header & footer are styled according to class defaults. |
 | __titlesec__ | __true__ | The `titlesec` package is used to style the section headers, as well as the title of the Supplementary Information (which is styled as a "part"). |
 |              | false | `titlesec` is not loaded. Section and part titles keep their class defaults. |
+| __noabstracttitle__ |   true    | Do not print "Abstract" above the abstract. This will cause the `abstract` package to be loaded with the 'style' option. |
+|                     | __false__ | Use standard options for the `abstract` package |
 
 ### Other features:
 
