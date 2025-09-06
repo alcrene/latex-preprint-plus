@@ -11,6 +11,7 @@
 %  - \l_preprint_title_format:  (internal)
 
 % TODO?: Rename to "decorations", and include conference notice?
+% TODO?: Set abstract font in frontmatter.sty instead?
 
 \cs_set:Nn \l_preprint_heading_spacing: {
   % sections with less space
@@ -25,7 +26,7 @@
 % Setting of abstractnamefont requires `abstract`, loaded in `frontmatter.sty`
 \cs_set:Nn \l_preprint_heading_format_bold: {
   \cs_set:Nn  \l_preprint_title_format: {\LARGE\bfseries}
-  \renewcommand{\abstractnamefont}{\normalfont\large\bfseries}
+  \renewcommand{\abstractnamefont}{\normalfont\normalsize\bfseries}
   \titleformat{\part}[display]{\filcenter\LARGE\bfseries}{}{0pt}{}{}  % Used to introduce supplementary material
   \titleformat*{\section}{\large\bfseries\raggedright}
   \titleformat*{\subsection}{\normalsize\bfseries\raggedright}
@@ -33,7 +34,7 @@
 }
 \cs_set:Nn \l_preprint_heading_format_sc: {
   \cs_set:Nn  \l_preprint_title_format: {\LARGE\scshape}
-  \renewcommand{\abstractnamefont}{\normalfont\large\bfseries\scshape}
+  \renewcommand{\abstractnamefont}{\normalfont\normalsize\bfseries\scshape}
   \titleformat{\part}[display]{\filcenter\LARGE\scshape}{}{0pt}{}{}  % Used to introduce supplementary material
   \titleformat*{\section}{\large\scshape\raggedright}
   \titleformat*{\subsection}{\normalsize\itshape\raggedright}

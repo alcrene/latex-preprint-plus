@@ -124,6 +124,8 @@
 \bool_new:N \l_preprint_fancy_headers_bool
 \bool_new:N \l_preprint_titlesec_bool
 \keys_define:nn { preprint }
+% \bool_new:N \l_preprint_use_abstract_bool
+\bool_new:N \l_preprint_no_abstract_title_bool
   {
     % margin indicators are useful for proofing, but readers won’t care for them
     marginticks.code:n = \RequirePackage{tikz,background}\l_preprint_draw_margin_ticks:,
@@ -167,6 +169,11 @@
     venue    .str_set:N = \l_preprint_venue_str,
     venue    .initial:V = \empty,
 
+    % useabstract      .bool_set:N = \l_preprint_use_abstract_bool,
+    % useabstract      .initial:n = true,
+
+    noabstracttitle .bool_set:N = \l_preprint_no_abstract_title_bool,
+    noabstracttitle .initial:n = false,
 
     % TODO: Multiple options (turn off supplementary, etc.), scoped under 'supplementary'
     supplementarytitle .str_set:N = \l_preprint_supplementary_str,
@@ -215,6 +222,10 @@
 
 \l_preprint_set_geom:
 \l_preprint_set_font:
+
+% Frontmatter options
+\l_preprint_set_abstract_format:  % Loads `abstract` pckg  -> Must be executed before setting headings
+\l_preprint_set_authors_format:   % Loads `authblk` pckg
 
 % Header options
 \if_bool:N \l_preprint_fancy_headers_bool

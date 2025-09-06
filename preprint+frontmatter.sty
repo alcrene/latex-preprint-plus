@@ -2,14 +2,28 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Frontmatter %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Loads: authblk, abstract
 % Provides:
-%  - \keywords
-%  - \abstract
+%  - \keywords  (if undefined — otherwise unchanged)
+%  - \abstract  (if undefined — otherwise wrapped)
+%  - \l_preprint_set_abstract_format
+%  - \l_preprint_set_author_format
+%  - \l_preprint_create_or_wrap_abstract_command  (internal)
+% unless your document class already provides these commands.
+%
+% Wraps:
+%  - \title
+%  - \maketitle
+%  - \abstract (if already defined)
+%
+% Options: 
+%  - noabstracttitle: If provided, a) {abstract} is loaded with 'style' option
+%                                  b) "Abstract" is not printed
+%
 % Side effects:
 %  - Changes \maketitle to also print the abstract & keywords
 %  - Stores the title in \l_preprint_title_str (since \@title is emptied by \maketitle)
 
-\RequirePackage{authblk}
-\RequirePackage{abstract}
+  % \RequirePackage{abstract}
+  % \RequirePackage{authblk}
 
 %%%%%%%%%%%%%% Keywords %%%%%%%%%%%%%%%%
 
@@ -25,41 +39,60 @@
 
 %%%%%%%%%%%%%% Abstract %%%%%%%%%%%%%%
 
-\cs_if_free:NTF\abstract {
-  % If \abstract is not defined by the document class, just define it.
-  % It will work in both the preamble and the document body.
-  \NewDocumentCommand{\abstract}{m}{\str_set:Nn \l_preprint_abstract_str {#1}}
-} {
-  % If \abstract is already defined, we need to wrap it, because it is
-  % used internally by `\begin{abstract}`
-  % In this case \abstract{} will only work in the preamble, but that’s
-  % enough to emulate the format of many journal.
-  % https://tex.stackexchange.com/questions/16295/how-does-one-detect-whether-one-is-in-the-preamble-or-not
-  \cs_set_eq:NN \l_preprint_oldabstract \abstract
-  \DeclareDocumentCommand{\abstract}{m}{
-    \ifx\@onlypreamble\@notprerr
-      \l_preprint_oldabstract{#1}
-    \else
-      \str_set:Nn \l_preprint_abstract_str {#1}
-    \fi
+\cs_set:Nn \l_preprint_create_or_wrap_abstract_cmd: {
+  \cs_if_free:NTF\abstract {
+    % If \abstract is not defined by the document class, just define it.
+    % It will work in both the preamble and the document body.
+    % NB: Use \cs_set instead of \str_set so that commands in ##1 are expanded
+    \NewDocumentCommand{\abstract}{m}{\cs_set:Nn \l_preprint_abstract_content: {##1}}
+  } {
+    % If \abstract is already defined, we need to wrap it, because it is
+    % used internally by `\begin{abstract}`
+    % In this case \abstract{} will only work in the preamble, but that’s
+    % enough to emulate the format of many journals.
+    % https://tex.stackexchange.com/questions/16295/how-does-one-detect-whether-one-is-in-the-preamble-or-not
+    \cs_set_eq:NN \l_preprint_oldabstract \abstract
+    \DeclareDocumentCommand{\abstract}{m}{
+      \ifx\@onlypreamble\@notprerr
+        \l_preprint_oldabstract{##1}
+      \else
+        % NB: Use \cs_set instead of \str_set so that commands in ##1 are expanded
+        \cs_set:Nn \l_preprint_abstract_content: {##1}
+      \fi
+    }
   }
 }
 
-
-%\newcommand{\abstractnamefont}{\normalfont\large\bfseries}
-  % abstractnamefont is set within preprint+headings.sty
-  % (Would it be better to set it here?)
-\renewcommand{\absleftindent}{0.5in}
-\renewcommand{\absrightindent}{0.5in}
-\renewcommand{\abstracttextfont}{\normalfont\normalsize}
-
+%% \if_bool:N \l_preprint_use_abstract_bool
+\cs_set:Nn \l_preprint_set_abstract_format: {
+  \if_bool:N \l_preprint_no_abstract_title_bool
+    \PassOptionsToPackage{style}{abstract}
+  \fi:
+  \RequirePackage{abstract}
+  \l_preprint_create_or_wrap_abstract_cmd:  % This must be called after loading abstract
+  %\newcommand{\abstractnamefont}{\normalfont\large\bfseries}
+    % abstractnamefont is set within preprint+headings.sty
+    % (Would it be better to set it here? Issue: It depends on the font series.)
+  \renewcommand{\absleftindent}{0.5in}
+  \renewcommand{\absrightindent}{0.5in}
+  \renewcommand{\abstracttextfont}{\normalfont\small}
+  \if_bool:N \l_preprint_no_abstract_title_bool  % Don’t print "Abstract" title
+    \renewcommand{\abstitlestyle}[1]{}           % Requires the 'style' option to {abstract}
+  \fi:
+}
+%% \else:
+%% \l_preprint_create_or_wrap_abstract_cmd:
+%% \fi:
 
 %%%%%%%%%%%%%%%% Authors %%%%%%%%%%%%%%%%
 
-\renewcommand{\Authfont}{\bfseries}  % This causes the whole, including 'and', to be bold
-\renewcommand{\Authsep}{,~}
-\renewcommand{\Authand}{~{\normalfont and}~}
-\renewcommand{\Authands}{,~{\normalfont and}~}
+\cs_set:Nn \l_preprint_set_authors_format: {
+  \RequirePackage{authblk}
+  \renewcommand{\Authfont}{\bfseries}  % This causes the whole, including 'and', to be bold
+  \renewcommand{\Authsep}{,~}
+  \renewcommand{\Authand}{~{\normalfont and}~}
+  \renewcommand{\Authands}{,~{\normalfont and}~}
+}
 
 
 
@@ -153,9 +186,9 @@
     % TODO?: Option for anonymous authors
     \begin{tabular}[t]{c}\bfseries\rule{\z@}{24\p@}\@author\end{tabular}%
     \vskip 0.2in
-    \cs_if_exist:NTF\l_preprint_abstract_str {
+    \cs_if_exist:NTF\l_preprint_abstract_content: {
       \begin{onecolabstract}
-        \l_preprint_abstract_str\par
+        \l_preprint_abstract_content:\par
         \l_preprint_print_keywords:
       \end{onecolabstract}
     }{}  % end if
