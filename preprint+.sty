@@ -131,7 +131,7 @@
     geom .choice:,
     geom / twocolumn.code:n = \let\l_preprint_set_geom:\l_preprint_set_geom_preprint:,
     geom / onecolumn.code:n = \let\l_preprint_set_geom:\l_preprint_set_geom_neurips:,
-    geom / natcomm  .code:n = \let\l_preprint_set_geom:\l_preprint_set_geom_natcomm:,
+    geom / nature  .code:n = \let\l_preprint_set_geom:\l_preprint_set_geom_nature:,
     geom / none     .code:n = \let\l_preprint_set_geom:\relax,
     geom / oneortwocol.code:n = \if@twocolumn\let\l_preprint_set_geom:\l_preprint_set_geom_preprint:\else\let\l_preprint_set_geom:\l_preprint_set_geom_neurips:\fi,
     geom .initial:n = oneortwocol,  % Select either onecolumn or twocolumn based on the class option; assumes standard {article} class or similar (i.e. relies on \if@twocolumn)
